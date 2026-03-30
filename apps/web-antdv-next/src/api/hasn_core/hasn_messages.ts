@@ -1,12 +1,11 @@
 import { requestClient } from '#/api/request';
 
 /**
- * HasnMessages API
+ * HASN 消息表 API
  */
 
 // Types
 export interface HasnMessages {
-  id: number;
   conversation_id: string;
   from_id: string;
   from_type: number;
@@ -17,18 +16,14 @@ export interface HasnMessages {
   msg_type: string;
   status: number;
   priority: string;
-  reply_to_id?: string;
+  reply_to_id?: number;
   local_id?: string;
-  mentions?: Record<string, any>;
-  mention_all: boolean;
   context?: Record<string, any>;
   recalled_at?: string;
   recalled_by?: string;
   edited_at?: string;
   edit_version: number;
   server_received_at: string;
-  created_time: string;
-  updated_time?: string;
 }
 
 export interface HasnMessagesParams {
@@ -42,8 +37,11 @@ export interface HasnMessagesParams {
   content_type?: number;
   msg_type?: string;
   status?: number;
-  reply_to_id?: string;
+  reply_to_id?: number;
   local_id?: string;
+  recalled_at?: string;
+  edited_at?: string;
+  server_received_at?: string;
 }
 
 export interface HasnMessagesCreateParams {
@@ -57,10 +55,8 @@ export interface HasnMessagesCreateParams {
   msg_type: string;
   status: number;
   priority: string;
-  reply_to_id?: string;
+  reply_to_id?: number;
   local_id?: string;
-  mentions?: Record<string, any>;
-  mention_all: boolean;
   context?: Record<string, any>;
   recalled_at?: string;
   recalled_by?: string;
@@ -76,21 +72,21 @@ export interface HasnMessagesListResult {
 
 // API functions
 export async function getHasnMessagesListApi(params: HasnMessagesParams): Promise<HasnMessagesListResult> {
-  return requestClient.get<HasnMessagesListResult>('/api/v1/hasn/hasn/messagess', { params });
+  return requestClient.get<HasnMessagesListResult>('/api/v1/hasn_core/hasn/messagess', { params });
 }
 
 export async function getHasnMessagesApi(id: number): Promise<HasnMessages> {
-  return requestClient.get<HasnMessages>(`/api/v1/hasn/hasn/messagess/${id}`);
+  return requestClient.get<HasnMessages>(`/api/v1/hasn_core/hasn/messagess/${id}`);
 }
 
 export async function createHasnMessagesApi(data: HasnMessagesCreateParams): Promise<HasnMessages> {
-  return requestClient.post<HasnMessages>('/api/v1/hasn/hasn/messagess', data);
+  return requestClient.post<HasnMessages>('/api/v1/hasn_core/hasn/messagess', data);
 }
 
 export async function updateHasnMessagesApi(id: number, data: Partial<HasnMessagesCreateParams>): Promise<HasnMessages> {
-  return requestClient.put<HasnMessages>(`/api/v1/hasn/hasn/messagess/${id}`, data);
+  return requestClient.put<HasnMessages>(`/api/v1/hasn_core/hasn/messagess/${id}`, data);
 }
 
 export async function deleteHasnMessagesApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/messagess/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn_core/hasn/messagess/${id}`);
 }

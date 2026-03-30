@@ -22,7 +22,7 @@ export interface HasnContacts {
   auto_expire?: string;
   connected_at?: string;
   last_interaction_at?: string;
-  interaction_count: number;
+  interaction_count: string;
   created_time: string;
   updated_time?: string;
 }
@@ -36,11 +36,6 @@ export interface HasnContactsParams {
   relation_type?: string;
   nickname?: string;
   status?: string;
-  auto_expire?: string;
-  connected_at?: string;
-  last_interaction_at?: string;
-  created_time?: string;
-  updated_time?: string;
 }
 
 export interface HasnContactsCreateParams {
@@ -59,7 +54,7 @@ export interface HasnContactsCreateParams {
   auto_expire?: string;
   connected_at?: string;
   last_interaction_at?: string;
-  interaction_count: number;
+  interaction_count: string;
 }
 
 export interface HasnContactsListResult {
@@ -69,21 +64,21 @@ export interface HasnContactsListResult {
 
 // API functions
 export async function getHasnContactsListApi(params: HasnContactsParams): Promise<HasnContactsListResult> {
-  return requestClient.get<HasnContactsListResult>('/api/v1/hasn/social/admin/contacts', { params });
+  return requestClient.get<HasnContactsListResult>('/api/v1/hasn/hasn/contactss', { params });
 }
 
 export async function getHasnContactsApi(id: number): Promise<HasnContacts> {
-  return requestClient.get<HasnContacts>(`/api/v1/hasn/social/admin/contacts/${id}`);
+  return requestClient.get<HasnContacts>(`/api/v1/hasn/hasn/contactss/${id}`);
 }
 
 export async function createHasnContactsApi(data: HasnContactsCreateParams): Promise<HasnContacts> {
-  return requestClient.post<HasnContacts>('/api/v1/hasn/social/admin/contacts', data);
+  return requestClient.post<HasnContacts>('/api/v1/hasn/hasn/contactss', data);
 }
 
 export async function updateHasnContactsApi(id: number, data: Partial<HasnContactsCreateParams>): Promise<HasnContacts> {
-  return requestClient.put<HasnContacts>(`/api/v1/hasn/social/admin/contacts/${id}`, data);
+  return requestClient.put<HasnContacts>(`/api/v1/hasn/hasn/contactss/${id}`, data);
 }
 
 export async function deleteHasnContactsApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/social/admin/contacts', { data: { pks: [id] } });
+  return requestClient.delete<void>(`/api/v1/hasn/hasn/contactss/${id}`);
 }

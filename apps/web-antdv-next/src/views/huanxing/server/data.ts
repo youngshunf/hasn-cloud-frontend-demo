@@ -45,6 +45,53 @@ export function useColumns(
     { field: 'region', title: '地域', width: 100 },
     { field: 'provider', title: '云服务商', width: 100 },
     { field: 'max_users', title: '最大用户数', width: 100 },
+    { 
+      field: 'config.user_count', 
+      title: '用户(活跃/总)', 
+      width: 120,
+      formatter: ({ row }) => {
+        const total = row.config?.user_count;
+        const active = row.config?.active_user_count;
+        if (total !== undefined && active !== undefined) return `${active} / ${total}`;
+        return total ?? '-';
+      }
+    },
+    { 
+      field: 'config.cpu_usage', 
+      title: 'CPU', 
+      width: 80,
+      formatter: ({ row }) => {
+        const cpu = row.config?.cpu_usage;
+        return cpu !== undefined && cpu !== null ? `${cpu}%` : '-';
+      }
+    },
+    { 
+      field: 'config.memory_usage', 
+      title: '内存', 
+      width: 120,
+      formatter: ({ row }) => {
+        const mem = row.config?.memory_usage;
+        const total = row.config?.total_memory_gb;
+        if (mem !== undefined && mem !== null && total !== undefined && total !== null) {
+            return `${mem}% (${total}GB)`;
+        }
+        return mem !== undefined && mem !== null ? `${mem}%` : '-';
+      }
+    },
+    { 
+      field: 'config.disk_usage', 
+      title: '硬盘', 
+      width: 120,
+      formatter: ({ row }) => {
+        const disk = row.config?.disk_usage;
+        const total = row.config?.total_disk_gb;
+        if (disk !== undefined && disk !== null && total !== undefined && total !== null) {
+            return `${disk}% (${total}GB)`;
+        }
+        return disk !== undefined && disk !== null ? `${disk}%` : '-';
+      }
+    },
+    { field: 'config.zeroclaw_version', title: '版本', width: 100 },
     {
       field: 'status',
       title: '状态',

@@ -4,7 +4,7 @@ import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { SubscriptionTier, SubscriptionTierParams } from '#/api/user_tier/subscription_tier';
+import type { CodegenTestTask, CodegenTestTaskParams } from '#/api/codegen_test/codegen_test_task';
 
 import { ref } from 'vue';
 
@@ -17,15 +17,15 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  getSubscriptionTierListApi,
-  createSubscriptionTierApi,
-  updateSubscriptionTierApi,
-  deleteSubscriptionTierApi,
-} from '#/api/user_tier/subscription_tier';
+  getCodegenTestTaskListApi,
+  createCodegenTestTaskApi,
+  updateCodegenTestTaskApi,
+  deleteCodegenTestTaskApi,
+} from '#/api/codegen_test/codegen_test_task';
 import { querySchema, useColumns, formSchema } from './data';
 
 defineOptions({
-  name: 'SubscriptionTier',
+  name: 'CodegenTestTask',
 });
 
 /**
@@ -40,7 +40,7 @@ const formOptions: VbenFormProps = {
   schema: querySchema,
 };
 
-const gridOptions: VxeTableGridOptions<SubscriptionTier> = {
+const gridOptions: VxeTableGridOptions<CodegenTestTask> = {
   rowConfig: {
     keyField: 'id',
   },
@@ -64,7 +64,7 @@ const gridOptions: VxeTableGridOptions<SubscriptionTier> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        return await getSubscriptionTierListApi({
+        return await getCodegenTestTaskListApi({
           page: page.currentPage,
           size: page.pageSize,
           ...formValues,
@@ -80,10 +80,10 @@ function onRefresh() {
   gridApi.query();
 }
 
-function onActionClick({ code, row }: OnActionClickParams<SubscriptionTier>) {
+function onActionClick({ code, row }: OnActionClickParams<CodegenTestTask>) {
   switch (code) {
     case 'delete': {
-      deleteSubscriptionTierApi(row.id).then(() => {
+      deleteCodegenTestTaskApi(row.id).then(() => {
         message.success($t('ui.actionMessage.deleteSuccess', [row.id]));
         onRefresh();
       });
@@ -113,12 +113,9 @@ const [editModal, editModalApi] = useVbenModal({
     const { valid } = await editFormApi.validate();
     if (valid) {
       editModalApi.lock();
-      const data = await editFormApi.getValues<any>();
+      const data = await editFormApi.getValues<CodegenTestTaskParams>();
       try {
-        // 将 newapi_quota 合并回 features
-        data.features = mergeQuotaToFeatures(data.features, data.newapi_quota);
-        delete data.newapi_quota;
-        await updateSubscriptionTierApi(editId.value, data);
+        await updateCodegenTestTaskApi(editId.value, data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await editModalApi.close();
         onRefresh();
@@ -129,16 +126,10 @@ const [editModal, editModalApi] = useVbenModal({
   },
   onOpenChange(isOpen: boolean) {
     if (isOpen) {
-      const data = editModalApi.getData<SubscriptionTier>();
+      const data = editModalApi.getData<CodegenTestTask>();
       editFormApi.resetForm();
       if (data) {
-        const features = typeof data.features === 'object' ? data.features : {};
-        const { newapi_quota, ...restFeatures } = features || {};
-        editFormApi.setValues({
-          ...data,
-          newapi_quota: newapi_quota ?? null,
-          features: Object.keys(restFeatures).length > 0 ? JSON.stringify(restFeatures, null, 2) : '',
-        });
+        editFormApi.setValues(data);
       }
     }
   },
@@ -158,12 +149,9 @@ const [addModal, addModalApi] = useVbenModal({
     const { valid } = await addFormApi.validate();
     if (valid) {
       addModalApi.lock();
-      const data = await addFormApi.getValues<any>();
+      const data = await addFormApi.getValues<CodegenTestTaskParams>();
       try {
-        // 将 newapi_quota 合并回 features
-        data.features = mergeQuotaToFeatures(data.features, data.newapi_quota);
-        delete data.newapi_quota;
-        await createSubscriptionTierApi(data);
+        await createCodegenTestTaskApi(data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();
@@ -178,29 +166,6 @@ const [addModal, addModalApi] = useVbenModal({
     }
   },
 });
-
-/**
- * 将 newapi_quota 合并回 features JSON 字段
- */
-function mergeQuotaToFeatures(featuresStr: any, newapiQuota: number | null | undefined): Record<string, any> {
-  let features: Record<string, any> = {};
-  if (typeof featuresStr === 'string' && featuresStr.trim()) {
-    try {
-      features = JSON.parse(featuresStr);
-    } catch {
-      message.error('功能特性 JSON 格式不正确');
-      throw new Error('Invalid JSON');
-    }
-  } else if (typeof featuresStr === 'object' && featuresStr) {
-    features = { ...featuresStr };
-  }
-  if (newapiQuota != null && newapiQuota > 0) {
-    features.newapi_quota = newapiQuota;
-  } else {
-    delete features.newapi_quota;
-  }
-  return features;
-}
 </script>
 
 <template>

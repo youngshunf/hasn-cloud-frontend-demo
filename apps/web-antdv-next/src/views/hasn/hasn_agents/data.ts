@@ -15,9 +15,15 @@ import { getDictOptions } from '#/utils/dict';
 export const querySchema: VbenFormSchema[] = [
   {
     component: 'Input',
+    fieldName: 'hasn_id',
+    label: 'HASN Agent 唯一标识',
+    componentProps: {"placeholder": "Search by HASN Agent \u552f\u4e00\u6807\u8bc6\uff08\u683c\u5f0f: a_{uuid}\uff09"},
+  },
+  {
+    component: 'Input',
     fieldName: 'star_id',
     label: 'Agent 唤星号',
-    componentProps: {"placeholder": "Search by Agent \u5524\u661f\u53f7 (100001#star)"},
+    componentProps: {"placeholder": "Search by Agent \u5524\u661f\u53f7\uff08\u5982: 100001#star\uff09"},
   },
   {
     component: 'Input',
@@ -33,9 +39,29 @@ export const querySchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'openclaw_agent_id',
-    label: '关联 OpenClaw Agent ID',
-    componentProps: {"placeholder": "Search by \u5173\u8054 OpenClaw Agent ID"},
+    fieldName: 'agent_name',
+    label: 'Agent 标识名',
+    componentProps: {"placeholder": "Search by Agent \u6807\u8bc6\u540d"},
+  },
+  {
+    component: 'Select',
+    fieldName: 'type',
+    label: 'Agent 类型',
+    componentProps: {
+      allowClear: true,
+      options: getDictOptions('hasn_type'),
+    },
+  },
+  {
+    component: 'Input',
+    fieldName: 'server_id',
+    label: '云端 Agent 所在服务器 ID',
+    componentProps: {"placeholder": "Search by \u4e91\u7aef Agent \u6240\u5728\u670d\u52a1\u5668 ID"},
+  },
+  {
+    component: '',
+    fieldName: 'home_client_id',
+    label: '本地 Agent 归属客户端 ID',
   },
   {
     component: 'Select',
@@ -43,14 +69,8 @@ export const querySchema: VbenFormSchema[] = [
     label: '状态',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_agent_status'),
+      options: getDictOptions('hasn_status'),
     },
-  },
-  {
-    component: 'RangePicker',
-    fieldName: 'last_active_at',
-    label: '最后活跃时间',
-    componentProps: {"format": "YYYY-MM-DD"},
   },
 ];
 
@@ -69,6 +89,11 @@ export function useColumns(
       width: 50,
     },
     {
+      field: 'hasn_id',
+      title: 'HASN Agent 唯一标识',
+      width: 150,
+    },
+    {
       field: 'star_id',
       title: 'Agent 唤星号',
       width: 150,
@@ -84,58 +109,42 @@ export function useColumns(
       width: 150,
     },
     {
-      field: 'api_key_hash',
-      title: 'API Key 的 SHA256 哈希',
+      field: 'agent_name',
+      title: 'Agent 标识名',
       width: 150,
     },
     {
-      field: 'api_key_prefix',
-      title: 'API Key 前16字符',
+      field: 'avatar_url',
+      title: '头像 URL',
       width: 150,
     },
     {
-      field: 'openclaw_agent_id',
-      title: '关联 OpenClaw Agent ID',
+      field: 'type',
+      title: 'Agent 类型',
       width: 150,
+      cellRender: {
+        name: 'CellTag',
+        options: getDictOptions('hasn_type'),
+      },
     },
     {
       field: 'role',
-      title: '角色',
+      title: 'Agent 角色',
       width: 150,
     },
     {
-      field: 'api_endpoint',
-      title: '外部 Agent 回调地址',
+      field: 'server_id',
+      title: '云端 Agent 所在服务器 ID',
       width: 150,
     },
     {
-      field: 'reputation_score',
-      title: '综合评分',
+      field: 'home_client_id',
+      title: '本地 Agent 归属客户端 ID',
       width: 150,
     },
     {
-      field: 'review_count',
-      title: '评价总数',
-      width: 150,
-    },
-    {
-      field: 'total_interactions',
-      title: '交互总次数',
-      width: 150,
-    },
-    {
-      field: 'experience_credit_score',
-      title: '经验贡献信用分',
-      width: 150,
-    },
-    {
-      field: 'experience_shared_count',
-      title: '分享的经验总数',
-      width: 150,
-    },
-    {
-      field: 'experience_adopted_count',
-      title: '经验被采纳总次数',
+      field: 'api_key_hash',
+      title: 'API Key 的 SHA256 哈希',
       width: 150,
     },
     {
@@ -144,12 +153,22 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_agent_status'),
+        options: getDictOptions('hasn_status'),
       },
     },
     {
-      field: 'last_active_at',
-      title: '最后活跃时间',
+      field: 'created_via',
+      title: '创建来源',
+      width: 150,
+    },
+    {
+      field: 'created_time',
+      title: '创建时间',
+      width: 150,
+    },
+    {
+      field: 'updated_time',
+      title: '更新时间',
       width: 150,
     },
     {
@@ -176,6 +195,12 @@ export function useColumns(
 export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
+    fieldName: 'hasn_id',
+    label: 'HASN Agent 唯一标识',
+    rules: 'required',
+  },
+  {
+    component: 'Input',
     fieldName: 'star_id',
     label: 'Agent 唤星号',
     rules: 'required',
@@ -194,102 +219,52 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'api_key_hash',
-    label: 'API Key 的 SHA256 哈希',
+    fieldName: 'agent_name',
+    label: 'Agent 标识名',
     rules: 'required',
-  },
-  {
-    component: 'Input',
-    fieldName: 'api_key_prefix',
-    label: 'API Key 前16字符',
-    rules: 'required',
-  },
-  {
-    component: 'Input',
-    fieldName: 'openclaw_agent_id',
-    label: '关联 OpenClaw Agent ID',
   },
   {
     component: 'Textarea',
     fieldName: 'description',
     label: 'Agent 描述',
-    rules: 'required',
     componentProps: {"rows": 4},
+  },
+  {
+    component: 'Textarea',
+    fieldName: 'avatar_url',
+    label: '头像 URL',
+    componentProps: {"rows": 4},
+  },
+  {
+    component: 'Select',
+    fieldName: 'type',
+    label: 'Agent 类型',
+    rules: 'required',
+    componentProps: {
+      options: getDictOptions('hasn_type'),
+    },
   },
   {
     component: 'Input',
     fieldName: 'role',
-    label: '角色',
+    label: 'Agent 角色',
     rules: 'required',
   },
   {
-    component: 'Textarea',
-    fieldName: 'capabilities',
-    label: '能力列表',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+    component: 'Input',
+    fieldName: 'server_id',
+    label: '云端 Agent 所在服务器 ID',
   },
   {
-    component: 'Textarea',
-    fieldName: 'profile',
-    label: 'Agent Profile Card',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+    component: 'Input',
+    fieldName: 'home_client_id',
+    label: '本地 Agent 归属客户端 ID',
   },
   {
-    component: 'Textarea',
-    fieldName: 'api_endpoint',
-    label: '外部 Agent 回调地址',
-    componentProps: {"rows": 4},
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'pricing',
-    label: '定价信息',
+    component: 'Input',
+    fieldName: 'api_key_hash',
+    label: 'API Key 的 SHA256 哈希',
     rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'reputation_score',
-    label: '综合评分',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'review_count',
-    label: '评价总数',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'total_interactions',
-    label: '交互总次数',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'experience_credit_score',
-    label: '经验贡献信用分',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'experience_shared_count',
-    label: '分享的经验总数',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
-  },
-  {
-    component: 'InputNumber',
-    fieldName: 'experience_adopted_count',
-    label: '经验被采纳总次数',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
   },
   {
     component: 'Select',
@@ -297,13 +272,13 @@ export const formSchema: VbenFormSchema[] = [
     label: '状态',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_agent_status'),
+      options: getDictOptions('hasn_status'),
     },
   },
   {
-    component: 'DatePicker',
-    fieldName: 'last_active_at',
-    label: '最后活跃时间',
-    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
+    component: 'Input',
+    fieldName: 'created_via',
+    label: '创建来源',
+    rules: 'required',
   },
 ];

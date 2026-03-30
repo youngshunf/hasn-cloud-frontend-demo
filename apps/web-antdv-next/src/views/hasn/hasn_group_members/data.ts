@@ -14,10 +14,9 @@ import { getDictOptions } from '#/utils/dict';
  */
 export const querySchema: VbenFormSchema[] = [
   {
-    component: 'Input',
+    component: '',
     fieldName: 'conversation_id',
-    label: '群会话ID',
-    componentProps: {"placeholder": "Search by \u7fa4\u4f1a\u8bddID"},
+    label: '群会话 ID',
   },
   {
     component: 'Input',
@@ -44,13 +43,7 @@ export const querySchema: VbenFormSchema[] = [
     component: 'Input',
     fieldName: 'member_name',
     label: '成员名称',
-    componentProps: {"placeholder": "Search by \u6210\u5458\u540d\u79f0(\u5197\u4f59\uff0c\u65b9\u4fbf\u67e5\u8be2)"},
-  },
-  {
-    component: 'RangePicker',
-    fieldName: 'joined_at',
-    label: '加入时间',
-    componentProps: {"format": "YYYY-MM-DD"},
+    componentProps: {"placeholder": "Search by \u6210\u5458\u540d\u79f0"},
   },
 ];
 
@@ -70,7 +63,7 @@ export function useColumns(
     },
     {
       field: 'conversation_id',
-      title: '群会话ID',
+      title: '群会话 ID',
       width: 150,
     },
     {
@@ -118,6 +111,16 @@ export function useColumns(
       width: 150,
     },
     {
+      field: 'created_time',
+      title: '创建时间',
+      width: 150,
+    },
+    {
+      field: 'updated_time',
+      title: '更新时间',
+      width: 150,
+    },
+    {
       field: 'operation',
       title: $t('common.table.operation'),
       align: 'center',
@@ -142,7 +145,7 @@ export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'conversation_id',
-    label: '群会话ID',
+    label: '群会话 ID',
     rules: 'required',
   },
   {
@@ -184,10 +187,9 @@ export const formSchema: VbenFormSchema[] = [
     label: '是否免打扰',
   },
   {
-    component: 'DatePicker',
+    component: 'Input',
     fieldName: 'joined_at',
     label: '加入时间',
-    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
   },
   {
     component: 'Input',

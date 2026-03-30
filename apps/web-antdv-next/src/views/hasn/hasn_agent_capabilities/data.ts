@@ -3,7 +3,7 @@ import type {
   OnActionClickFn,
   VxeGridProps,
 } from '#/adapter/vxe-table';
-import type { HasnHumans } from '#/api/hasn/hasn_humans';
+import type { HasnAgentCapabilities } from '#/api/hasn/hasn_agent_capabilities';
 
 import { $t } from '@vben/locales';
 
@@ -15,26 +15,27 @@ import { getDictOptions } from '#/utils/dict';
 export const querySchema: VbenFormSchema[] = [
   {
     component: 'Input',
-    fieldName: 'hasn_id',
-    label: 'HASN 唯一标识',
-    componentProps: {"placeholder": "Search by HASN \u552f\u4e00\u6807\u8bc6 (h_{uuid})"},
+    fieldName: 'agent_hasn_id',
+    label: 'Agent 的 hasn_id',
+    componentProps: {"placeholder": "Search by Agent \u7684 hasn_id"},
   },
   {
     component: 'Input',
-    fieldName: 'star_id',
-    label: '唤星号',
-    componentProps: {"placeholder": "Search by \u5524\u661f\u53f7 (\u6570\u5b57\u53f7\u6216\u81ea\u5b9a\u4e49\u53f7)"},
-  },
-  {
-    component: '',
-    fieldName: 'user_id',
-    label: '关联唤星平台用户 ID',
+    fieldName: 'capability_id',
+    label: '能力唯一标识',
+    componentProps: {"placeholder": "Search by \u80fd\u529b\u552f\u4e00\u6807\u8bc6"},
   },
   {
     component: 'Input',
     fieldName: 'name',
-    label: '显示名称',
-    componentProps: {"placeholder": "Search by \u663e\u793a\u540d\u79f0"},
+    label: '能力名称',
+    componentProps: {"placeholder": "Search by \u80fd\u529b\u540d\u79f0"},
+  },
+  {
+    component: 'Select',
+    fieldName: 'idempotent',
+    label: '是否幂等',
+    componentProps: {"options": [{"label": "Yes", "value": true}, {"label": "No", "value": false}]},
   },
   {
     component: 'Select',
@@ -51,7 +52,7 @@ export const querySchema: VbenFormSchema[] = [
  * Table columns configuration
  */
 export function useColumns(
-  onActionClick?: OnActionClickFn<HasnHumans>,
+  onActionClick?: OnActionClickFn<HasnAgentCapabilities>,
 ): VxeGridProps['columns'] {
   return [
     {
@@ -62,28 +63,28 @@ export function useColumns(
       width: 50,
     },
     {
-      field: 'hasn_id',
-      title: 'HASN 唯一标识',
+      field: 'agent_hasn_id',
+      title: 'Agent 的 hasn_id',
       width: 150,
     },
     {
-      field: 'star_id',
-      title: '唤星号',
-      width: 150,
-    },
-    {
-      field: 'user_id',
-      title: '关联唤星平台用户 ID',
+      field: 'capability_id',
+      title: '能力唯一标识',
       width: 150,
     },
     {
       field: 'name',
-      title: '显示名称',
+      title: '能力名称',
       width: 150,
     },
     {
-      field: 'avatar_url',
-      title: '头像 URL',
+      field: 'estimated_time_ms',
+      title: '预计耗时',
+      width: 150,
+    },
+    {
+      field: 'idempotent',
+      title: '是否幂等',
       width: 150,
     },
     {
@@ -94,11 +95,6 @@ export function useColumns(
         name: 'CellTag',
         options: getDictOptions('hasn_status'),
       },
-    },
-    {
-      field: 'timezone',
-      title: '时区',
-      width: 150,
     },
     {
       field: 'created_time',
@@ -134,39 +130,65 @@ export function useColumns(
 export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
-    fieldName: 'hasn_id',
-    label: 'HASN 唯一标识',
+    fieldName: 'agent_hasn_id',
+    label: 'Agent 的 hasn_id',
     rules: 'required',
   },
   {
     component: 'Input',
-    fieldName: 'star_id',
-    label: '唤星号',
-    rules: 'required',
-  },
-  {
-    component: 'Input',
-    fieldName: 'user_id',
-    label: '关联唤星平台用户 ID',
+    fieldName: 'capability_id',
+    label: '能力唯一标识',
     rules: 'required',
   },
   {
     component: 'Input',
     fieldName: 'name',
-    label: '显示名称',
+    label: '能力名称',
     rules: 'required',
   },
   {
     component: 'Textarea',
-    fieldName: 'bio',
-    label: '个人简介',
+    fieldName: 'description',
+    label: '能力描述',
     componentProps: {"rows": 4},
   },
   {
     component: 'Textarea',
-    fieldName: 'avatar_url',
-    label: '头像 URL',
+    fieldName: 'input_schema',
+    label: '输入 JSON Schema',
+    rules: 'required',
+    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+  },
+  {
+    component: 'Textarea',
+    fieldName: 'output_schema',
+    label: '输出 JSON Schema',
+    rules: 'required',
+    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+  },
+  {
+    component: 'Textarea',
+    fieldName: 'requires_permission',
+    label: '所需权限',
+    rules: 'required',
+    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+  },
+  {
+    component: 'Textarea',
+    fieldName: 'tags',
+    label: '能力标签',
     componentProps: {"rows": 4},
+  },
+  {
+    component: 'Input',
+    fieldName: 'estimated_time_ms',
+    label: '预计耗时',
+    rules: 'required',
+  },
+  {
+    component: 'Switch',
+    fieldName: 'idempotent',
+    label: '是否幂等',
   },
   {
     component: 'Select',
@@ -176,30 +198,5 @@ export const formSchema: VbenFormSchema[] = [
     componentProps: {
       options: getDictOptions('hasn_status'),
     },
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'contact_policy',
-    label: '联系人策略',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
-  },
-  {
-    component: 'Input',
-    fieldName: 'timezone',
-    label: '时区',
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'tags',
-    label: '个人标签',
-    componentProps: {"rows": 4},
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'stats',
-    label: '统计信息',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
   },
 ];

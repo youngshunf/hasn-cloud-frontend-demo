@@ -3,7 +3,7 @@ import type {
   OnActionClickFn,
   VxeGridProps,
 } from '#/adapter/vxe-table';
-import type { HasnHumans } from '#/api/hasn/hasn_humans';
+import type { HasnClients } from '#/api/hasn/hasn_clients';
 
 import { $t } from '@vben/locales';
 
@@ -15,26 +15,30 @@ import { getDictOptions } from '#/utils/dict';
 export const querySchema: VbenFormSchema[] = [
   {
     component: 'Input',
-    fieldName: 'hasn_id',
-    label: 'HASN 唯一标识',
-    componentProps: {"placeholder": "Search by HASN \u552f\u4e00\u6807\u8bc6 (h_{uuid})"},
+    fieldName: 'client_id',
+    label: '客户端唯一标识',
+    componentProps: {"placeholder": "Search by \u5ba2\u6237\u7aef\u552f\u4e00\u6807\u8bc6 (\u683c\u5f0f: c_{uuid_short})"},
   },
   {
     component: 'Input',
-    fieldName: 'star_id',
-    label: '唤星号',
-    componentProps: {"placeholder": "Search by \u5524\u661f\u53f7 (\u6570\u5b57\u53f7\u6216\u81ea\u5b9a\u4e49\u53f7)"},
+    fieldName: 'user_hasn_id',
+    label: '所属 Human 的 hasn_id',
+    componentProps: {"placeholder": "Search by \u6240\u5c5e Human \u7684 hasn_id\uff08\u683c\u5f0f: h_xxx\uff09"},
   },
   {
-    component: '',
-    fieldName: 'user_id',
-    label: '关联唤星平台用户 ID',
+    component: 'Select',
+    fieldName: 'client_type',
+    label: '客户端类型',
+    componentProps: {
+      allowClear: true,
+      options: getDictOptions('hasn_client_type'),
+    },
   },
   {
     component: 'Input',
-    fieldName: 'name',
-    label: '显示名称',
-    componentProps: {"placeholder": "Search by \u663e\u793a\u540d\u79f0"},
+    fieldName: 'device_name',
+    label: '设备名称',
+    componentProps: {"placeholder": "Search by \u8bbe\u5907\u540d\u79f0"},
   },
   {
     component: 'Select',
@@ -51,7 +55,7 @@ export const querySchema: VbenFormSchema[] = [
  * Table columns configuration
  */
 export function useColumns(
-  onActionClick?: OnActionClickFn<HasnHumans>,
+  onActionClick?: OnActionClickFn<HasnClients>,
 ): VxeGridProps['columns'] {
   return [
     {
@@ -62,28 +66,32 @@ export function useColumns(
       width: 50,
     },
     {
-      field: 'hasn_id',
-      title: 'HASN 唯一标识',
+      field: 'client_id',
+      title: '客户端唯一标识',
       width: 150,
     },
     {
-      field: 'star_id',
-      title: '唤星号',
+      field: 'user_hasn_id',
+      title: '所属 Human 的 hasn_id',
       width: 150,
     },
     {
-      field: 'user_id',
-      title: '关联唤星平台用户 ID',
+      field: 'client_type',
+      title: '客户端类型',
+      width: 150,
+      cellRender: {
+        name: 'CellTag',
+        options: getDictOptions('hasn_client_type'),
+      },
+    },
+    {
+      field: 'device_name',
+      title: '设备名称',
       width: 150,
     },
     {
-      field: 'name',
-      title: '显示名称',
-      width: 150,
-    },
-    {
-      field: 'avatar_url',
-      title: '头像 URL',
+      field: 'last_seen_at',
+      title: '最后活跃时间',
       width: 150,
     },
     {
@@ -94,11 +102,6 @@ export function useColumns(
         name: 'CellTag',
         options: getDictOptions('hasn_status'),
       },
-    },
-    {
-      field: 'timezone',
-      title: '时区',
-      width: 150,
     },
     {
       field: 'created_time',
@@ -134,39 +137,41 @@ export function useColumns(
 export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
-    fieldName: 'hasn_id',
-    label: 'HASN 唯一标识',
+    fieldName: 'client_id',
+    label: '客户端唯一标识',
     rules: 'required',
   },
   {
     component: 'Input',
-    fieldName: 'star_id',
-    label: '唤星号',
+    fieldName: 'user_hasn_id',
+    label: '所属 Human 的 hasn_id',
     rules: 'required',
   },
   {
-    component: 'Input',
-    fieldName: 'user_id',
-    label: '关联唤星平台用户 ID',
+    component: 'Select',
+    fieldName: 'client_type',
+    label: '客户端类型',
     rules: 'required',
+    componentProps: {
+      options: getDictOptions('hasn_client_type'),
+    },
   },
   {
     component: 'Input',
-    fieldName: 'name',
-    label: '显示名称',
-    rules: 'required',
+    fieldName: 'device_name',
+    label: '设备名称',
   },
   {
     component: 'Textarea',
-    fieldName: 'bio',
-    label: '个人简介',
-    componentProps: {"rows": 4},
+    fieldName: 'device_info',
+    label: '设备信息',
+    rules: 'required',
+    componentProps: {"placeholder": "Enter JSON", "rows": 6},
   },
   {
-    component: 'Textarea',
-    fieldName: 'avatar_url',
-    label: '头像 URL',
-    componentProps: {"rows": 4},
+    component: 'Input',
+    fieldName: 'last_seen_at',
+    label: '最后活跃时间',
   },
   {
     component: 'Select',
@@ -176,30 +181,5 @@ export const formSchema: VbenFormSchema[] = [
     componentProps: {
       options: getDictOptions('hasn_status'),
     },
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'contact_policy',
-    label: '联系人策略',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
-  },
-  {
-    component: 'Input',
-    fieldName: 'timezone',
-    label: '时区',
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'tags',
-    label: '个人标签',
-    componentProps: {"rows": 4},
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'stats',
-    label: '统计信息',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
   },
 ];

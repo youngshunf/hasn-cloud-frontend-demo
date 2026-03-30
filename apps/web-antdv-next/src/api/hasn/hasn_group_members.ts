@@ -1,11 +1,12 @@
 import { requestClient } from '#/api/request';
 
 /**
- * HASN 群成员表 API
+ * HasnGroupMembers API
  */
 
 // Types
 export interface HasnGroupMembers {
+  id: number;
   conversation_id: string;
   member_id: string;
   member_type: string;
@@ -15,6 +16,8 @@ export interface HasnGroupMembers {
   muted: boolean;
   joined_at?: string;
   invited_by?: string;
+  created_time: string;
+  updated_time?: string;
 }
 
 export interface HasnGroupMembersParams {
@@ -25,7 +28,6 @@ export interface HasnGroupMembersParams {
   member_type?: string;
   member_star_id?: string;
   member_name?: string;
-  joined_at?: string;
 }
 
 export interface HasnGroupMembersCreateParams {
@@ -47,21 +49,21 @@ export interface HasnGroupMembersListResult {
 
 // API functions
 export async function getHasnGroupMembersListApi(params: HasnGroupMembersParams): Promise<HasnGroupMembersListResult> {
-  return requestClient.get<HasnGroupMembersListResult>('/api/v1/hasn/admin/group-members', { params });
+  return requestClient.get<HasnGroupMembersListResult>('/api/v1/hasn/hasn/group/memberss', { params });
 }
 
 export async function getHasnGroupMembersApi(id: number): Promise<HasnGroupMembers> {
-  return requestClient.get<HasnGroupMembers>(`/api/v1/hasn/admin/group-members/${id}`);
+  return requestClient.get<HasnGroupMembers>(`/api/v1/hasn/hasn/group/memberss/${id}`);
 }
 
 export async function createHasnGroupMembersApi(data: HasnGroupMembersCreateParams): Promise<HasnGroupMembers> {
-  return requestClient.post<HasnGroupMembers>('/api/v1/hasn/admin/group-members', data);
+  return requestClient.post<HasnGroupMembers>('/api/v1/hasn/hasn/group/memberss', data);
 }
 
 export async function updateHasnGroupMembersApi(id: number, data: Partial<HasnGroupMembersCreateParams>): Promise<HasnGroupMembers> {
-  return requestClient.put<HasnGroupMembers>(`/api/v1/hasn/admin/group-members/${id}`, data);
+  return requestClient.put<HasnGroupMembers>(`/api/v1/hasn/hasn/group/memberss/${id}`, data);
 }
 
 export async function deleteHasnGroupMembersApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/admin/group-members', { data: { pks: [id] } });
+  return requestClient.delete<void>(`/api/v1/hasn/hasn/group/memberss/${id}`);
 }

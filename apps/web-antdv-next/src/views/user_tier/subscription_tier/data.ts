@@ -91,14 +91,32 @@ export function useColumns(
       formatter: ({ cellValue }) => cellValue ? `${(cellValue * 100).toFixed(0)}%` : '-',
     },
     {
+      field: 'newapi_quota_display',
+      title: 'New-API 额度',
+      width: 140,
+      formatter: ({ row }: { row: any }) => {
+        const q = row.features?.newapi_quota;
+        if (!q) return '默认';
+        const v = Number(q);
+        if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}B`;
+        if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+        return String(v);
+      },
+    },
+    {
+      field: 'max_agents',
+      title: '最大Agent数',
+      width: 110,
+    },
+    {
       field: 'enabled',
       title: '是否启用',
-      width: 150,
+      width: 100,
     },
     {
       field: 'sort_order',
       title: '排序权重',
-      width: 150,
+      width: 100,
     },
     {
       field: 'operation',
@@ -171,11 +189,28 @@ export const formSchema: VbenFormSchema[] = [
     componentProps: {"style": "width: 100%", "placeholder": "如 0.8 表示8折", "min": 0, "max": 1, "step": 0.05},
   },
   {
+    component: 'InputNumber',
+    fieldName: 'newapi_quota',
+    label: 'New-API 额度',
+    componentProps: {
+      "style": "width: 100%",
+      "placeholder": "留空则使用默认值（1积分=500,000 quota）",
+      "min": 0,
+    },
+    help: '覆盖默认的 new-api quota，留空则按 积分×500000 自动计算',
+  },
+  {
+    component: 'InputNumber',
+    fieldName: 'max_agents',
+    label: '最大Agent数',
+    componentProps: {"style": "width: 100%", "min": 1},
+    defaultValue: 1,
+  },
+  {
     component: 'Textarea',
     fieldName: 'features',
-    label: '功能特性',
-    rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+    label: '功能特性(JSON)',
+    componentProps: {"placeholder": "其他功能配置（JSON格式，newapi_quota 已提取为独立字段）", "rows": 4},
   },
   {
     component: 'Switch',

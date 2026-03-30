@@ -1,52 +1,74 @@
 import { requestClient } from '#/api/request';
 
 /**
- * HASN 对话/会话表 API
+ * HasnConversations API
  */
 
 // Types
 export interface HasnConversations {
+  id: string;
   type: string;
-  participant_a?: string;
-  participant_b?: string;
-  name?: string;
-  group_star_id?: string;
-  group_avatar?: string;
+  relation_type?: string;
+  participant_b_id?: string;
+  participant_a_type: string;
+  participant_b_type?: string;
+  trade_session_id?: string;
+  group_name?: string;
   group_description?: string;
+  group_avatar_url?: string;
+  group_owner_id?: string;
   agent_policy: string;
-  max_members: number;
-  creator_id?: string;
+  join_policy: string;
+  max_members: string;
+  allow_invite: boolean;
+  mute_all: boolean;
+  member_count: string;
   last_message_at?: string;
   last_message_preview?: string;
-  message_count: number;
+  last_message_from?: string;
+  message_count: string;
   status: string;
+  created_time: string;
+  updated_time?: string;
 }
 
 export interface HasnConversationsParams {
   page?: number;
   size?: number;
+  id?: string;
   type?: string;
-  name?: string;
-  group_star_id?: string;
-  creator_id?: string;
-  last_message_at?: string;
+  relation_type?: string;
+  participant_b_id?: string;
+  participant_a_type?: string;
+  participant_b_type?: string;
+  trade_session_id?: string;
+  group_name?: string;
+  group_owner_id?: string;
   status?: string;
 }
 
 export interface HasnConversationsCreateParams {
+  id: string;
   type: string;
-  participant_a?: string;
-  participant_b?: string;
-  name?: string;
-  group_star_id?: string;
-  group_avatar?: string;
+  relation_type?: string;
+  participant_b_id?: string;
+  participant_a_type: string;
+  participant_b_type?: string;
+  trade_session_id?: string;
+  group_name?: string;
   group_description?: string;
+  group_avatar_url?: string;
+  group_owner_id?: string;
   agent_policy: string;
-  max_members: number;
-  creator_id?: string;
+  join_policy: string;
+  max_members: string;
+  allow_invite: boolean;
+  mute_all: boolean;
+  member_count: string;
   last_message_at?: string;
   last_message_preview?: string;
-  message_count: number;
+  last_message_from?: string;
+  message_count: string;
   status: string;
 }
 
@@ -57,21 +79,21 @@ export interface HasnConversationsListResult {
 
 // API functions
 export async function getHasnConversationsListApi(params: HasnConversationsParams): Promise<HasnConversationsListResult> {
-  return requestClient.get<HasnConversationsListResult>('/api/v1/hasn/admin/conversations', { params });
+  return requestClient.get<HasnConversationsListResult>('/api/v1/hasn/hasn/conversationss', { params });
 }
 
 export async function getHasnConversationsApi(id: number): Promise<HasnConversations> {
-  return requestClient.get<HasnConversations>(`/api/v1/hasn/admin/conversations/${id}`);
+  return requestClient.get<HasnConversations>(`/api/v1/hasn/hasn/conversationss/${id}`);
 }
 
 export async function createHasnConversationsApi(data: HasnConversationsCreateParams): Promise<HasnConversations> {
-  return requestClient.post<HasnConversations>('/api/v1/hasn/admin/conversations', data);
+  return requestClient.post<HasnConversations>('/api/v1/hasn/hasn/conversationss', data);
 }
 
 export async function updateHasnConversationsApi(id: number, data: Partial<HasnConversationsCreateParams>): Promise<HasnConversations> {
-  return requestClient.put<HasnConversations>(`/api/v1/hasn/admin/conversations/${id}`, data);
+  return requestClient.put<HasnConversations>(`/api/v1/hasn/hasn/conversationss/${id}`, data);
 }
 
 export async function deleteHasnConversationsApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/admin/conversations', { data: { pks: [id] } });
+  return requestClient.delete<void>(`/api/v1/hasn/hasn/conversationss/${id}`);
 }

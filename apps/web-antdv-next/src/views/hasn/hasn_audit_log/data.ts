@@ -40,8 +40,8 @@ export const querySchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'target_id',
-    label: '目标ID',
-    componentProps: {"placeholder": "Search by \u76ee\u6807ID"},
+    label: '目标 ID',
+    componentProps: {"placeholder": "Search by \u76ee\u6807 ID"},
   },
 ];
 
@@ -75,7 +75,7 @@ export function useColumns(
     },
     {
       field: 'action',
-      title: '操作',
+      title: '操作类型',
       width: 150,
     },
     {
@@ -89,12 +89,22 @@ export function useColumns(
     },
     {
       field: 'target_id',
-      title: '目标ID',
+      title: '目标 ID',
       width: 150,
     },
     {
       field: 'ip_address',
-      title: 'IP地址',
+      title: 'IP 地址',
+      width: 150,
+    },
+    {
+      field: 'created_time',
+      title: '创建时间',
+      width: 150,
+    },
+    {
+      field: 'updated_time',
+      title: '更新时间',
       width: 150,
     },
     {
@@ -137,7 +147,7 @@ export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'action',
-    label: '操作',
+    label: '操作类型',
     rules: 'required',
   },
   {
@@ -151,7 +161,7 @@ export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'target_id',
-    label: '目标ID',
+    label: '目标 ID',
   },
   {
     component: 'Textarea',
@@ -163,6 +173,6 @@ export const formSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'ip_address',
-    label: 'IP地址',
+    label: 'IP 地址',
   },
 ];

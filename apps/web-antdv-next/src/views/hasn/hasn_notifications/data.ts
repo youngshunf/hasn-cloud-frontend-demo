@@ -22,10 +22,10 @@ export const querySchema: VbenFormSchema[] = [
   {
     component: 'Select',
     fieldName: 'type',
-    label: '类型',
+    label: '通知类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_notif_type'),
+      options: getDictOptions('hasn_type'),
     },
   },
   {
@@ -57,11 +57,11 @@ export function useColumns(
     },
     {
       field: 'type',
-      title: '类型',
+      title: '通知类型',
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_notif_type'),
+        options: getDictOptions('hasn_type'),
       },
     },
     {
@@ -72,6 +72,16 @@ export function useColumns(
     {
       field: 'read',
       title: '是否已读',
+      width: 150,
+    },
+    {
+      field: 'created_time',
+      title: '创建时间',
+      width: 150,
+    },
+    {
+      field: 'updated_time',
+      title: '更新时间',
       width: 150,
     },
     {
@@ -105,10 +115,10 @@ export const formSchema: VbenFormSchema[] = [
   {
     component: 'Select',
     fieldName: 'type',
-    label: '类型',
+    label: '通知类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_notif_type'),
+      options: getDictOptions('hasn_type'),
     },
   },
   {

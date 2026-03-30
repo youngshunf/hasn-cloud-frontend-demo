@@ -14,37 +14,68 @@ import { getDictOptions } from '#/utils/dict';
  */
 export const querySchema: VbenFormSchema[] = [
   {
+    component: '',
+    fieldName: 'id',
+    label: '会话 ID',
+  },
+  {
     component: 'Select',
     fieldName: 'type',
-    label: '类型',
+    label: '会话类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_conv_type'),
+      options: getDictOptions('hasn_type'),
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'relation_type',
+    label: '关系类型',
+    componentProps: {
+      allowClear: true,
+      options: getDictOptions('hasn_relation_type'),
     },
   },
   {
     component: 'Input',
-    fieldName: 'name',
+    fieldName: 'participant_b_id',
+    label: '参与方 B hasn_id',
+    componentProps: {"placeholder": "Search by \u53c2\u4e0e\u65b9 B hasn_id\uff08\u5355\u804a\u5fc5\u586b\uff0c\u7fa4\u804a\u4e3a NULL\uff09"},
+  },
+  {
+    component: 'Select',
+    fieldName: 'participant_a_type',
+    label: '参与方 A 类型',
+    componentProps: {
+      allowClear: true,
+      options: getDictOptions('hasn_participant_a_type'),
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'participant_b_type',
+    label: '参与方 B 类型',
+    componentProps: {
+      allowClear: true,
+      options: getDictOptions('hasn_participant_b_type'),
+    },
+  },
+  {
+    component: '',
+    fieldName: 'trade_session_id',
+    label: '关联交易会话 ID',
+  },
+  {
+    component: 'Input',
+    fieldName: 'group_name',
     label: '群名称',
-    componentProps: {"placeholder": "Search by \u7fa4\u540d\u79f0"},
+    componentProps: {"placeholder": "Search by \u7fa4\u540d\u79f0\uff08type=group \u65f6\u6709\u503c\uff09"},
   },
   {
     component: 'Input',
-    fieldName: 'group_star_id',
-    label: '群唤星号',
-    componentProps: {"placeholder": "Search by \u7fa4\u5524\u661f\u53f7 (g:500001)"},
-  },
-  {
-    component: 'Input',
-    fieldName: 'creator_id',
-    label: '群创建者 hasn_id',
-    componentProps: {"placeholder": "Search by \u7fa4\u521b\u5efa\u8005 hasn_id"},
-  },
-  {
-    component: 'RangePicker',
-    fieldName: 'last_message_at',
-    label: '最后消息时间',
-    componentProps: {"format": "YYYY-MM-DD"},
+    fieldName: 'group_owner_id',
+    label: '群主 hasn_id',
+    componentProps: {"placeholder": "Search by \u7fa4\u4e3b hasn_id\uff08type=group \u65f6\u6709\u503c\uff09"},
   },
   {
     component: 'Select',
@@ -52,7 +83,7 @@ export const querySchema: VbenFormSchema[] = [
     label: '状态',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_conv_status'),
+      options: getDictOptions('hasn_status'),
     },
   },
 ];
@@ -73,36 +104,63 @@ export function useColumns(
     },
     {
       field: 'type',
-      title: '类型',
+      title: '会话类型',
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_conv_type'),
+        options: getDictOptions('hasn_type'),
       },
     },
     {
-      field: 'participant_a',
-      title: '参与者A hasn_id',
+      field: 'relation_type',
+      title: '关系类型',
+      width: 150,
+      cellRender: {
+        name: 'CellTag',
+        options: getDictOptions('hasn_relation_type'),
+      },
+    },
+    {
+      field: 'participant_b_id',
+      title: '参与方 B hasn_id',
       width: 150,
     },
     {
-      field: 'participant_b',
-      title: '参与者B hasn_id',
+      field: 'participant_a_type',
+      title: '参与方 A 类型',
+      width: 150,
+      cellRender: {
+        name: 'CellTag',
+        options: getDictOptions('hasn_participant_a_type'),
+      },
+    },
+    {
+      field: 'participant_b_type',
+      title: '参与方 B 类型',
+      width: 150,
+      cellRender: {
+        name: 'CellTag',
+        options: getDictOptions('hasn_participant_b_type'),
+      },
+    },
+    {
+      field: 'trade_session_id',
+      title: '关联交易会话 ID',
       width: 150,
     },
     {
-      field: 'name',
+      field: 'group_name',
       title: '群名称',
       width: 150,
     },
     {
-      field: 'group_star_id',
-      title: '群唤星号',
+      field: 'group_avatar_url',
+      title: '群头像 URL',
       width: 150,
     },
     {
-      field: 'group_avatar',
-      title: '群头像',
+      field: 'group_owner_id',
+      title: '群主 hasn_id',
       width: 150,
     },
     {
@@ -111,18 +169,43 @@ export function useColumns(
       width: 150,
     },
     {
-      field: 'max_members',
-      title: '群最大成员数',
+      field: 'join_policy',
+      title: '加入策略',
       width: 150,
     },
     {
-      field: 'creator_id',
-      title: '群创建者 hasn_id',
+      field: 'max_members',
+      title: '最大成员数',
+      width: 150,
+    },
+    {
+      field: 'allow_invite',
+      title: '成员是否可邀请',
+      width: 150,
+    },
+    {
+      field: 'mute_all',
+      title: '全员禁言',
+      width: 150,
+    },
+    {
+      field: 'member_count',
+      title: '当前成员数',
       width: 150,
     },
     {
       field: 'last_message_at',
       title: '最后消息时间',
+      width: 150,
+    },
+    {
+      field: 'last_message_preview',
+      title: '最后消息预览',
+      width: 150,
+    },
+    {
+      field: 'last_message_from',
+      title: '最后消息发送方 hasn_id',
       width: 150,
     },
     {
@@ -136,8 +219,18 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_conv_status'),
+        options: getDictOptions('hasn_status'),
       },
+    },
+    {
+      field: 'created_time',
+      title: '创建时间',
+      width: 150,
+    },
+    {
+      field: 'updated_time',
+      title: '更新时间',
+      width: 150,
     },
     {
       field: 'operation',
@@ -162,39 +255,59 @@ export function useColumns(
  */
 export const formSchema: VbenFormSchema[] = [
   {
+    component: 'Input',
+    fieldName: 'id',
+    label: '会话 ID',
+    rules: 'required',
+  },
+  {
     component: 'Select',
     fieldName: 'type',
-    label: '类型',
+    label: '会话类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_conv_type'),
+      options: getDictOptions('hasn_type'),
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'relation_type',
+    label: '关系类型',
+    componentProps: {
+      options: getDictOptions('hasn_relation_type'),
     },
   },
   {
     component: 'Input',
-    fieldName: 'participant_a',
-    label: '参与者A hasn_id',
+    fieldName: 'participant_b_id',
+    label: '参与方 B hasn_id',
+  },
+  {
+    component: 'Select',
+    fieldName: 'participant_a_type',
+    label: '参与方 A 类型',
+    rules: 'required',
+    componentProps: {
+      options: getDictOptions('hasn_participant_a_type'),
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'participant_b_type',
+    label: '参与方 B 类型',
+    componentProps: {
+      options: getDictOptions('hasn_participant_b_type'),
+    },
   },
   {
     component: 'Input',
-    fieldName: 'participant_b',
-    label: '参与者B hasn_id',
+    fieldName: 'trade_session_id',
+    label: '关联交易会话 ID',
   },
   {
     component: 'Input',
-    fieldName: 'name',
+    fieldName: 'group_name',
     label: '群名称',
-  },
-  {
-    component: 'Input',
-    fieldName: 'group_star_id',
-    label: '群唤星号',
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'group_avatar',
-    label: '群头像',
-    componentProps: {"rows": 4},
   },
   {
     component: 'Textarea',
@@ -203,41 +316,70 @@ export const formSchema: VbenFormSchema[] = [
     componentProps: {"rows": 4},
   },
   {
+    component: 'Textarea',
+    fieldName: 'group_avatar_url',
+    label: '群头像 URL',
+    componentProps: {"rows": 4},
+  },
+  {
+    component: 'Input',
+    fieldName: 'group_owner_id',
+    label: '群主 hasn_id',
+  },
+  {
     component: 'Input',
     fieldName: 'agent_policy',
     label: 'Agent 发言策略',
     rules: 'required',
   },
   {
-    component: 'InputNumber',
-    fieldName: 'max_members',
-    label: '群最大成员数',
+    component: 'Input',
+    fieldName: 'join_policy',
+    label: '加入策略',
     rules: 'required',
-    componentProps: {"style": "width: 100%"},
   },
   {
     component: 'Input',
-    fieldName: 'creator_id',
-    label: '群创建者 hasn_id',
+    fieldName: 'max_members',
+    label: '最大成员数',
+    rules: 'required',
   },
   {
-    component: 'DatePicker',
+    component: 'Switch',
+    fieldName: 'allow_invite',
+    label: '成员是否可邀请',
+  },
+  {
+    component: 'Switch',
+    fieldName: 'mute_all',
+    label: '全员禁言',
+  },
+  {
+    component: 'Input',
+    fieldName: 'member_count',
+    label: '当前成员数',
+    rules: 'required',
+  },
+  {
+    component: 'Input',
     fieldName: 'last_message_at',
     label: '最后消息时间',
-    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
   },
   {
-    component: 'Textarea',
+    component: 'Input',
     fieldName: 'last_message_preview',
     label: '最后消息预览',
-    componentProps: {"rows": 4},
   },
   {
-    component: 'InputNumber',
+    component: 'Input',
+    fieldName: 'last_message_from',
+    label: '最后消息发送方 hasn_id',
+  },
+  {
+    component: 'Input',
     fieldName: 'message_count',
     label: '消息总数',
     rules: 'required',
-    componentProps: {"style": "width: 100%"},
   },
   {
     component: 'Select',
@@ -245,7 +387,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '状态',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_conv_status'),
+      options: getDictOptions('hasn_status'),
     },
   },
 ];

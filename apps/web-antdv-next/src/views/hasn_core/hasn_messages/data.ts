@@ -3,7 +3,7 @@ import type {
   OnActionClickFn,
   VxeGridProps,
 } from '#/adapter/vxe-table';
-import type { HasnMessages } from '#/api/hasn/hasn_messages';
+import type { HasnMessages } from '#/api/hasn_core/hasn_messages';
 
 import { $t } from '@vben/locales';
 
@@ -30,14 +30,14 @@ export const querySchema: VbenFormSchema[] = [
     label: '发送方类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_from_type'),
+      options: getDictOptions('hasn_core_from_type'),
     },
   },
   {
     component: 'Input',
     fieldName: 'to_id',
-    label: '接收方标识',
-    componentProps: {"placeholder": "Search by \u63a5\u6536\u65b9\u6807\u8bc6\uff08\u5355\u804a=hasn_id\uff0c\u7fa4\u804a=group_id \u5982 g:500001\uff09"},
+    label: '接收方 hasn_id',
+    componentProps: {"placeholder": "Search by \u63a5\u6536\u65b9 hasn_id"},
   },
   {
     component: 'Select',
@@ -45,7 +45,7 @@ export const querySchema: VbenFormSchema[] = [
     label: '接收方类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_to_type'),
+      options: getDictOptions('hasn_core_to_type'),
     },
   },
   {
@@ -54,7 +54,7 @@ export const querySchema: VbenFormSchema[] = [
     label: '内容类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_content_type'),
+      options: getDictOptions('hasn_core_content_type'),
     },
   },
   {
@@ -63,7 +63,7 @@ export const querySchema: VbenFormSchema[] = [
     label: '消息类型',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_msg_type'),
+      options: getDictOptions('hasn_core_msg_type'),
     },
   },
   {
@@ -72,18 +72,37 @@ export const querySchema: VbenFormSchema[] = [
     label: '消息状态',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_status'),
+      options: getDictOptions('hasn_core_status'),
     },
   },
   {
-    component: '',
+    component: 'InputNumber',
     fieldName: 'reply_to_id',
     label: '回复的消息 ID',
+    componentProps: {"style": "width: 100%"},
   },
   {
     component: '',
     fieldName: 'local_id',
     label: '客户端本地 ID',
+  },
+  {
+    component: 'RangePicker',
+    fieldName: 'recalled_at',
+    label: '撤回时间',
+    componentProps: {"format": "YYYY-MM-DD"},
+  },
+  {
+    component: 'RangePicker',
+    fieldName: 'edited_at',
+    label: '最后编辑时间',
+    componentProps: {"format": "YYYY-MM-DD"},
+  },
+  {
+    component: 'RangePicker',
+    fieldName: 'server_received_at',
+    label: '服务端接收时间',
+    componentProps: {"format": "YYYY-MM-DD"},
   },
 ];
 
@@ -117,12 +136,12 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_from_type'),
+        options: getDictOptions('hasn_core_from_type'),
       },
     },
     {
       field: 'to_id',
-      title: '接收方标识',
+      title: '接收方 hasn_id',
       width: 150,
     },
     {
@@ -131,7 +150,7 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_to_type'),
+        options: getDictOptions('hasn_core_to_type'),
       },
     },
     {
@@ -140,7 +159,7 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_content_type'),
+        options: getDictOptions('hasn_core_content_type'),
       },
     },
     {
@@ -149,7 +168,7 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_msg_type'),
+        options: getDictOptions('hasn_core_msg_type'),
       },
     },
     {
@@ -158,7 +177,7 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_status'),
+        options: getDictOptions('hasn_core_status'),
       },
     },
     {
@@ -174,11 +193,6 @@ export function useColumns(
     {
       field: 'local_id',
       title: '客户端本地 ID',
-      width: 150,
-    },
-    {
-      field: 'mention_all',
-      title: '是否 @所有人',
       width: 150,
     },
     {
@@ -204,16 +218,6 @@ export function useColumns(
     {
       field: 'server_received_at',
       title: '服务端接收时间',
-      width: 150,
-    },
-    {
-      field: 'created_time',
-      title: '创建时间',
-      width: 150,
-    },
-    {
-      field: 'updated_time',
-      title: '更新时间',
       width: 150,
     },
     {
@@ -256,13 +260,13 @@ export const formSchema: VbenFormSchema[] = [
     label: '发送方类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_from_type'),
+      options: getDictOptions('hasn_core_from_type'),
     },
   },
   {
     component: 'Input',
     fieldName: 'to_id',
-    label: '接收方标识',
+    label: '接收方 hasn_id',
     rules: 'required',
   },
   {
@@ -271,7 +275,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '接收方类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_to_type'),
+      options: getDictOptions('hasn_core_to_type'),
     },
   },
   {
@@ -280,7 +284,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '内容类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_content_type'),
+      options: getDictOptions('hasn_core_content_type'),
     },
   },
   {
@@ -296,7 +300,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '消息类型',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_msg_type'),
+      options: getDictOptions('hasn_core_msg_type'),
     },
   },
   {
@@ -305,7 +309,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '消息状态',
     rules: 'required',
     componentProps: {
-      options: getDictOptions('hasn_status'),
+      options: getDictOptions('hasn_core_status'),
     },
   },
   {
@@ -315,9 +319,10 @@ export const formSchema: VbenFormSchema[] = [
     rules: 'required',
   },
   {
-    component: 'Input',
+    component: 'InputNumber',
     fieldName: 'reply_to_id',
     label: '回复的消息 ID',
+    componentProps: {"style": "width: 100%"},
   },
   {
     component: 'Input',
@@ -326,25 +331,15 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Textarea',
-    fieldName: 'mentions',
-    label: '@提及列表',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
-  },
-  {
-    component: 'Switch',
-    fieldName: 'mention_all',
-    label: '是否 @所有人',
-  },
-  {
-    component: 'Textarea',
     fieldName: 'context',
     label: '消息上下文',
     componentProps: {"placeholder": "Enter JSON", "rows": 6},
   },
   {
-    component: 'Input',
+    component: 'DatePicker',
     fieldName: 'recalled_at',
     label: '撤回时间',
+    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
   },
   {
     component: 'Input',
@@ -352,9 +347,10 @@ export const formSchema: VbenFormSchema[] = [
     label: '撤回者 hasn_id',
   },
   {
-    component: 'Input',
+    component: 'DatePicker',
     fieldName: 'edited_at',
     label: '最后编辑时间',
+    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
   },
   {
     component: 'InputNumber',
@@ -364,9 +360,10 @@ export const formSchema: VbenFormSchema[] = [
     componentProps: {"style": "width: 100%"},
   },
   {
-    component: 'Input',
+    component: 'DatePicker',
     fieldName: 'server_received_at',
     label: '服务端接收时间',
     rules: 'required',
+    componentProps: {"format": "YYYY-MM-DD HH:mm:ss", "showTime": true, "valueFormat": "YYYY-MM-DD HH:mm:ss"},
   },
 ];
