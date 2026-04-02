@@ -49,21 +49,21 @@ export interface HasnGroupMembersListResult {
 
 // API functions
 export async function getHasnGroupMembersListApi(params: HasnGroupMembersParams): Promise<HasnGroupMembersListResult> {
-  return requestClient.get<HasnGroupMembersListResult>('/api/v1/hasn/hasn/group/memberss', { params });
+  return requestClient.get<HasnGroupMembersListResult>('/api/v1/hasn/hasn/group/members', { params });
 }
 
 export async function getHasnGroupMembersApi(id: number): Promise<HasnGroupMembers> {
-  return requestClient.get<HasnGroupMembers>(`/api/v1/hasn/hasn/group/memberss/${id}`);
+  return requestClient.get<HasnGroupMembers>(`/api/v1/hasn/hasn/group/members/${id}`);
 }
 
 export async function createHasnGroupMembersApi(data: HasnGroupMembersCreateParams): Promise<HasnGroupMembers> {
-  return requestClient.post<HasnGroupMembers>('/api/v1/hasn/hasn/group/memberss', data);
+  return requestClient.post<HasnGroupMembers>('/api/v1/hasn/hasn/group/members', data);
 }
 
 export async function updateHasnGroupMembersApi(id: number, data: Partial<HasnGroupMembersCreateParams>): Promise<HasnGroupMembers> {
-  return requestClient.put<HasnGroupMembers>(`/api/v1/hasn/hasn/group/memberss/${id}`, data);
+  return requestClient.put<HasnGroupMembers>(`/api/v1/hasn/hasn/group/members/${id}`, data);
 }
 
 export async function deleteHasnGroupMembersApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/group/memberss/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn/hasn/group/members/${id}`);
 }

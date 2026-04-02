@@ -76,21 +76,21 @@ export interface HasnMessagesListResult {
 
 // API functions
 export async function getHasnMessagesListApi(params: HasnMessagesParams): Promise<HasnMessagesListResult> {
-  return requestClient.get<HasnMessagesListResult>('/api/v1/hasn/hasn/messagess', { params });
+  return requestClient.get<HasnMessagesListResult>('/api/v1/hasn/hasn/messages', { params });
 }
 
 export async function getHasnMessagesApi(id: number): Promise<HasnMessages> {
-  return requestClient.get<HasnMessages>(`/api/v1/hasn/hasn/messagess/${id}`);
+  return requestClient.get<HasnMessages>(`/api/v1/hasn/hasn/messages/${id}`);
 }
 
 export async function createHasnMessagesApi(data: HasnMessagesCreateParams): Promise<HasnMessages> {
-  return requestClient.post<HasnMessages>('/api/v1/hasn/hasn/messagess', data);
+  return requestClient.post<HasnMessages>('/api/v1/hasn/hasn/messages', data);
 }
 
 export async function updateHasnMessagesApi(id: number, data: Partial<HasnMessagesCreateParams>): Promise<HasnMessages> {
-  return requestClient.put<HasnMessages>(`/api/v1/hasn/hasn/messagess/${id}`, data);
+  return requestClient.put<HasnMessages>(`/api/v1/hasn/hasn/messages/${id}`, data);
 }
 
 export async function deleteHasnMessagesApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/messagess/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn/hasn/messages/${id}`);
 }
