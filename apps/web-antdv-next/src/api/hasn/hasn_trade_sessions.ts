@@ -49,21 +49,21 @@ export interface HasnTradeSessionsListResult {
 
 // API functions
 export async function getHasnTradeSessionsListApi(params: HasnTradeSessionsParams): Promise<HasnTradeSessionsListResult> {
-  return requestClient.get<HasnTradeSessionsListResult>('/api/v1/hasn/hasn/trade/sessions', { params });
+  return requestClient.get<HasnTradeSessionsListResult>('/api/v1/hasn/trade/sessions', { params });
 }
 
 export async function getHasnTradeSessionsApi(id: number): Promise<HasnTradeSessions> {
-  return requestClient.get<HasnTradeSessions>(`/api/v1/hasn/hasn/trade/sessions/${id}`);
+  return requestClient.get<HasnTradeSessions>(`/api/v1/hasn/trade/sessions/${id}`);
 }
 
 export async function createHasnTradeSessionsApi(data: HasnTradeSessionsCreateParams): Promise<HasnTradeSessions> {
-  return requestClient.post<HasnTradeSessions>('/api/v1/hasn/hasn/trade/sessions', data);
+  return requestClient.post<HasnTradeSessions>('/api/v1/hasn/trade/sessions', data);
 }
 
 export async function updateHasnTradeSessionsApi(id: number, data: Partial<HasnTradeSessionsCreateParams>): Promise<HasnTradeSessions> {
-  return requestClient.put<HasnTradeSessions>(`/api/v1/hasn/hasn/trade/sessions/${id}`, data);
+  return requestClient.put<HasnTradeSessions>(`/api/v1/hasn/trade/sessions/${id}`, data);
 }
 
 export async function deleteHasnTradeSessionsApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/trade/sessions/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn/trade/sessions/${id}`);
 }

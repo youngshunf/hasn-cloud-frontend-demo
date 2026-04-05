@@ -63,21 +63,21 @@ export interface HasnAgentsListResult {
 
 // API functions
 export async function getHasnAgentsListApi(params: HasnAgentsParams): Promise<HasnAgentsListResult> {
-  return requestClient.get<HasnAgentsListResult>('/api/v1/hasn/hasn/agents', { params });
+  return requestClient.get<HasnAgentsListResult>('/api/v1/hasn/agents', { params });
 }
 
 export async function getHasnAgentsApi(id: number): Promise<HasnAgents> {
-  return requestClient.get<HasnAgents>(`/api/v1/hasn/hasn/agents/${id}`);
+  return requestClient.get<HasnAgents>(`/api/v1/hasn/agents/${id}`);
 }
 
 export async function createHasnAgentsApi(data: HasnAgentsCreateParams): Promise<HasnAgents> {
-  return requestClient.post<HasnAgents>('/api/v1/hasn/hasn/agents', data);
+  return requestClient.post<HasnAgents>('/api/v1/hasn/agents', data);
 }
 
 export async function updateHasnAgentsApi(id: number, data: Partial<HasnAgentsCreateParams>): Promise<HasnAgents> {
-  return requestClient.put<HasnAgents>(`/api/v1/hasn/hasn/agents/${id}`, data);
+  return requestClient.put<HasnAgents>(`/api/v1/hasn/agents/${id}`, data);
 }
 
 export async function deleteHasnAgentsApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/agents/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn/agents/${id}`);
 }

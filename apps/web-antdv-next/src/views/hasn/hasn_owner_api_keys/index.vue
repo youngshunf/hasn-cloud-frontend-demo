@@ -4,7 +4,7 @@ import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { HasnHumans, HasnHumansParams } from '#/api/hasn_core/hasn_humans';
+import type { HasnOwnerApiKeys, HasnOwnerApiKeysParams } from '#/api/hasn/hasn_owner_api_keys';
 
 import { ref } from 'vue';
 
@@ -17,15 +17,15 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  getHasnHumansListApi,
-  createHasnHumansApi,
-  updateHasnHumansApi,
-  deleteHasnHumansApi,
-} from '#/api/hasn_core/hasn_humans';
+  getHasnOwnerApiKeysListApi,
+  createHasnOwnerApiKeysApi,
+  updateHasnOwnerApiKeysApi,
+  deleteHasnOwnerApiKeysApi,
+} from '#/api/hasn/hasn_owner_api_keys';
 import { querySchema, useColumns, formSchema } from './data';
 
 defineOptions({
-  name: 'HasnHumans',
+  name: 'HasnOwnerApiKeys',
 });
 
 /**
@@ -40,7 +40,7 @@ const formOptions: VbenFormProps = {
   schema: querySchema,
 };
 
-const gridOptions: VxeTableGridOptions<HasnHumans> = {
+const gridOptions: VxeTableGridOptions<HasnOwnerApiKeys> = {
   rowConfig: {
     keyField: 'id',
   },
@@ -64,7 +64,7 @@ const gridOptions: VxeTableGridOptions<HasnHumans> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        return await getHasnHumansListApi({
+        return await getHasnOwnerApiKeysListApi({
           page: page.currentPage,
           size: page.pageSize,
           ...formValues,
@@ -80,10 +80,10 @@ function onRefresh() {
   gridApi.query();
 }
 
-function onActionClick({ code, row }: OnActionClickParams<HasnHumans>) {
+function onActionClick({ code, row }: OnActionClickParams<HasnOwnerApiKeys>) {
   switch (code) {
     case 'delete': {
-      deleteHasnHumansApi(row.id).then(() => {
+      deleteHasnOwnerApiKeysApi(row.id).then(() => {
         message.success($t('ui.actionMessage.deleteSuccess', [row.id]));
         onRefresh();
       });
@@ -113,9 +113,9 @@ const [editModal, editModalApi] = useVbenModal({
     const { valid } = await editFormApi.validate();
     if (valid) {
       editModalApi.lock();
-      const data = await editFormApi.getValues<HasnHumansParams>();
+      const data = await editFormApi.getValues<HasnOwnerApiKeysParams>();
       try {
-        await updateHasnHumansApi(editId.value, data);
+        await updateHasnOwnerApiKeysApi(editId.value, data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await editModalApi.close();
         onRefresh();
@@ -126,7 +126,7 @@ const [editModal, editModalApi] = useVbenModal({
   },
   onOpenChange(isOpen: boolean) {
     if (isOpen) {
-      const data = editModalApi.getData<HasnHumans>();
+      const data = editModalApi.getData<HasnOwnerApiKeys>();
       editFormApi.resetForm();
       if (data) {
         editFormApi.setValues(data);
@@ -149,9 +149,9 @@ const [addModal, addModalApi] = useVbenModal({
     const { valid } = await addFormApi.validate();
     if (valid) {
       addModalApi.lock();
-      const data = await addFormApi.getValues<HasnHumansParams>();
+      const data = await addFormApi.getValues<HasnOwnerApiKeysParams>();
       try {
-        await createHasnHumansApi(data);
+        await createHasnOwnerApiKeysApi(data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();

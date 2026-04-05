@@ -41,21 +41,21 @@ export interface HasnNotificationsListResult {
 
 // API functions
 export async function getHasnNotificationsListApi(params: HasnNotificationsParams): Promise<HasnNotificationsListResult> {
-  return requestClient.get<HasnNotificationsListResult>('/api/v1/hasn/hasn/notifications', { params });
+  return requestClient.get<HasnNotificationsListResult>('/api/v1/hasn/notifications', { params });
 }
 
 export async function getHasnNotificationsApi(id: number): Promise<HasnNotifications> {
-  return requestClient.get<HasnNotifications>(`/api/v1/hasn/hasn/notifications/${id}`);
+  return requestClient.get<HasnNotifications>(`/api/v1/hasn/notifications/${id}`);
 }
 
 export async function createHasnNotificationsApi(data: HasnNotificationsCreateParams): Promise<HasnNotifications> {
-  return requestClient.post<HasnNotifications>('/api/v1/hasn/hasn/notifications', data);
+  return requestClient.post<HasnNotifications>('/api/v1/hasn/notifications', data);
 }
 
 export async function updateHasnNotificationsApi(id: number, data: Partial<HasnNotificationsCreateParams>): Promise<HasnNotifications> {
-  return requestClient.put<HasnNotifications>(`/api/v1/hasn/hasn/notifications/${id}`, data);
+  return requestClient.put<HasnNotifications>(`/api/v1/hasn/notifications/${id}`, data);
 }
 
 export async function deleteHasnNotificationsApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/hasn/hasn/notifications/${id}`);
+  return requestClient.delete<void>(`/api/v1/hasn/notifications/${id}`);
 }

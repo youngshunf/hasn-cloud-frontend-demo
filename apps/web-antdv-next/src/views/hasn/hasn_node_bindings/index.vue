@@ -4,7 +4,7 @@ import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { HasnUnreadCounts, HasnUnreadCountsParams } from '#/api/hasn_core/hasn_unread_counts';
+import type { HasnNodeBindings, HasnNodeBindingsParams } from '#/api/hasn/hasn_node_bindings';
 
 import { ref } from 'vue';
 
@@ -17,15 +17,15 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  getHasnUnreadCountsListApi,
-  createHasnUnreadCountsApi,
-  updateHasnUnreadCountsApi,
-  deleteHasnUnreadCountsApi,
-} from '#/api/hasn_core/hasn_unread_counts';
+  getHasnNodeBindingsListApi,
+  createHasnNodeBindingsApi,
+  updateHasnNodeBindingsApi,
+  deleteHasnNodeBindingsApi,
+} from '#/api/hasn/hasn_node_bindings';
 import { querySchema, useColumns, formSchema } from './data';
 
 defineOptions({
-  name: 'HasnUnreadCounts',
+  name: 'HasnNodeBindings',
 });
 
 /**
@@ -40,7 +40,7 @@ const formOptions: VbenFormProps = {
   schema: querySchema,
 };
 
-const gridOptions: VxeTableGridOptions<HasnUnreadCounts> = {
+const gridOptions: VxeTableGridOptions<HasnNodeBindings> = {
   rowConfig: {
     keyField: 'id',
   },
@@ -64,7 +64,7 @@ const gridOptions: VxeTableGridOptions<HasnUnreadCounts> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        return await getHasnUnreadCountsListApi({
+        return await getHasnNodeBindingsListApi({
           page: page.currentPage,
           size: page.pageSize,
           ...formValues,
@@ -80,10 +80,10 @@ function onRefresh() {
   gridApi.query();
 }
 
-function onActionClick({ code, row }: OnActionClickParams<HasnUnreadCounts>) {
+function onActionClick({ code, row }: OnActionClickParams<HasnNodeBindings>) {
   switch (code) {
     case 'delete': {
-      deleteHasnUnreadCountsApi(row.id).then(() => {
+      deleteHasnNodeBindingsApi(row.id).then(() => {
         message.success($t('ui.actionMessage.deleteSuccess', [row.id]));
         onRefresh();
       });
@@ -113,9 +113,9 @@ const [editModal, editModalApi] = useVbenModal({
     const { valid } = await editFormApi.validate();
     if (valid) {
       editModalApi.lock();
-      const data = await editFormApi.getValues<HasnUnreadCountsParams>();
+      const data = await editFormApi.getValues<HasnNodeBindingsParams>();
       try {
-        await updateHasnUnreadCountsApi(editId.value, data);
+        await updateHasnNodeBindingsApi(editId.value, data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await editModalApi.close();
         onRefresh();
@@ -126,7 +126,7 @@ const [editModal, editModalApi] = useVbenModal({
   },
   onOpenChange(isOpen: boolean) {
     if (isOpen) {
-      const data = editModalApi.getData<HasnUnreadCounts>();
+      const data = editModalApi.getData<HasnNodeBindings>();
       editFormApi.resetForm();
       if (data) {
         editFormApi.setValues(data);
@@ -149,9 +149,9 @@ const [addModal, addModalApi] = useVbenModal({
     const { valid } = await addFormApi.validate();
     if (valid) {
       addModalApi.lock();
-      const data = await addFormApi.getValues<HasnUnreadCountsParams>();
+      const data = await addFormApi.getValues<HasnNodeBindingsParams>();
       try {
-        await createHasnUnreadCountsApi(data);
+        await createHasnNodeBindingsApi(data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();

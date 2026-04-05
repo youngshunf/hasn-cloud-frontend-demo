@@ -4,7 +4,7 @@ import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { HasnMessages, HasnMessagesParams } from '#/api/hasn_core/hasn_messages';
+import type { HasnNodes, HasnNodesParams } from '#/api/hasn/hasn_nodes';
 
 import { ref } from 'vue';
 
@@ -17,15 +17,15 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  getHasnMessagesListApi,
-  createHasnMessagesApi,
-  updateHasnMessagesApi,
-  deleteHasnMessagesApi,
-} from '#/api/hasn_core/hasn_messages';
+  getHasnNodesListApi,
+  createHasnNodesApi,
+  updateHasnNodesApi,
+  deleteHasnNodesApi,
+} from '#/api/hasn/hasn_nodes';
 import { querySchema, useColumns, formSchema } from './data';
 
 defineOptions({
-  name: 'HasnMessages',
+  name: 'HasnNodes',
 });
 
 /**
@@ -40,7 +40,7 @@ const formOptions: VbenFormProps = {
   schema: querySchema,
 };
 
-const gridOptions: VxeTableGridOptions<HasnMessages> = {
+const gridOptions: VxeTableGridOptions<HasnNodes> = {
   rowConfig: {
     keyField: 'id',
   },
@@ -64,7 +64,7 @@ const gridOptions: VxeTableGridOptions<HasnMessages> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        return await getHasnMessagesListApi({
+        return await getHasnNodesListApi({
           page: page.currentPage,
           size: page.pageSize,
           ...formValues,
@@ -80,10 +80,10 @@ function onRefresh() {
   gridApi.query();
 }
 
-function onActionClick({ code, row }: OnActionClickParams<HasnMessages>) {
+function onActionClick({ code, row }: OnActionClickParams<HasnNodes>) {
   switch (code) {
     case 'delete': {
-      deleteHasnMessagesApi(row.id).then(() => {
+      deleteHasnNodesApi(row.id).then(() => {
         message.success($t('ui.actionMessage.deleteSuccess', [row.id]));
         onRefresh();
       });
@@ -113,9 +113,9 @@ const [editModal, editModalApi] = useVbenModal({
     const { valid } = await editFormApi.validate();
     if (valid) {
       editModalApi.lock();
-      const data = await editFormApi.getValues<HasnMessagesParams>();
+      const data = await editFormApi.getValues<HasnNodesParams>();
       try {
-        await updateHasnMessagesApi(editId.value, data);
+        await updateHasnNodesApi(editId.value, data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await editModalApi.close();
         onRefresh();
@@ -126,7 +126,7 @@ const [editModal, editModalApi] = useVbenModal({
   },
   onOpenChange(isOpen: boolean) {
     if (isOpen) {
-      const data = editModalApi.getData<HasnMessages>();
+      const data = editModalApi.getData<HasnNodes>();
       editFormApi.resetForm();
       if (data) {
         editFormApi.setValues(data);
@@ -149,9 +149,9 @@ const [addModal, addModalApi] = useVbenModal({
     const { valid } = await addFormApi.validate();
     if (valid) {
       addModalApi.lock();
-      const data = await addFormApi.getValues<HasnMessagesParams>();
+      const data = await addFormApi.getValues<HasnNodesParams>();
       try {
-        await createHasnMessagesApi(data);
+        await createHasnNodesApi(data);
         message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();
