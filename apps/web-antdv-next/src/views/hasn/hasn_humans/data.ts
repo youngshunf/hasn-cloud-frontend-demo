@@ -32,8 +32,8 @@ export const querySchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'name',
-    label: '显示名称',
+    fieldName: 'nickname',
+    label: '昵称',
     componentProps: {"placeholder": "Search by \u663e\u793a\u540d\u79f0"},
   },
   {
@@ -77,13 +77,13 @@ export function useColumns(
       width: 150,
     },
     {
-      field: 'name',
-      title: '显示名称',
+      field: 'nickname',
+      title: '昵称',
       width: 150,
     },
     {
-      field: 'avatar_url',
-      title: '头像 URL',
+      field: 'avatar',
+      title: '头像',
       width: 150,
     },
     {
@@ -152,8 +152,8 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'name',
-    label: '显示名称',
+    fieldName: 'nickname',
+    label: '昵称',
     rules: 'required',
   },
   {
@@ -164,8 +164,8 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Textarea',
-    fieldName: 'avatar_url',
-    label: '头像 URL',
+    fieldName: 'avatar',
+    label: '头像',
     componentProps: {"rows": 4},
   },
   {

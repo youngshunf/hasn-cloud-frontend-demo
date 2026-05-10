@@ -33,7 +33,7 @@ export const querySchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'name',
+    fieldName: 'display_name',
     label: 'Agent 显示名',
     componentProps: {"placeholder": "Search by Agent \u663e\u793a\u540d"},
   },
@@ -104,7 +104,7 @@ export function useColumns(
       width: 150,
     },
     {
-      field: 'name',
+      field: 'display_name',
       title: 'Agent 显示名',
       width: 150,
     },
@@ -114,8 +114,8 @@ export function useColumns(
       width: 150,
     },
     {
-      field: 'avatar_url',
-      title: '头像 URL',
+      field: 'avatar',
+      title: '头像',
       width: 150,
     },
     {
@@ -213,7 +213,7 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Input',
-    fieldName: 'name',
+    fieldName: 'display_name',
     label: 'Agent 显示名',
     rules: 'required',
   },
@@ -231,8 +231,8 @@ export const formSchema: VbenFormSchema[] = [
   },
   {
     component: 'Textarea',
-    fieldName: 'avatar_url',
-    label: '头像 URL',
+    fieldName: 'avatar',
+    label: '头像',
     componentProps: {"rows": 4},
   },
   {
@@ -280,5 +280,47 @@ export const formSchema: VbenFormSchema[] = [
     fieldName: 'created_via',
     label: '创建来源',
     rules: 'required',
+  },
+  // PR6: Runtime selection (§5.5 / §6 of 01-Hermes RuntimeAdapter接入设计.md).
+  // Optional; backend defaults to hermes/local. endpoint_ref/auth_ref must
+  // start with `secret://` — backend pydantic validator rejects plaintext.
+  {
+    component: 'Select',
+    fieldName: 'runtime_type',
+    label: 'Runtime 类型',
+    componentProps: {
+      placeholder: 'hermes (默认)',
+      options: [{ label: 'Hermes', value: 'hermes' }],
+      allowClear: true,
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'runtime_location',
+    label: 'Runtime 位置',
+    componentProps: {
+      placeholder: 'local (默认)',
+      options: [
+        { label: '本地', value: 'local' },
+        { label: '云端', value: 'cloud' },
+      ],
+      allowClear: true,
+    },
+  },
+  {
+    component: 'Input',
+    fieldName: 'endpoint_ref',
+    label: 'Endpoint Ref',
+    componentProps: {
+      placeholder: 'secret://runtime/hermes/local-endpoint',
+    },
+  },
+  {
+    component: 'Input',
+    fieldName: 'auth_ref',
+    label: 'Auth Ref',
+    componentProps: {
+      placeholder: 'secret://runtime/hermes/local-hmac',
+    },
   },
 ];
