@@ -1,10 +1,10 @@
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeGridProps } from '#/adapter/vxe-table';
 import type { HasnTask } from '#/api/hasn/hasn_task';
-
 import { $t } from '@vben/locales';
 
 import { z } from '#/adapter/form';
+import { getHasnSkillBundleListApi } from '#/api/hasn/hasn_skill_bundle';
 
 const scheduleTypeOptions = [
   { color: 'blue', label: '一次性', value: 'once' },
@@ -69,6 +69,27 @@ function optionalJsonRule(): VbenFormSchema['rules'] {
         });
         return z.NEVER;
       }
+    });
+}
+
+function arrayOrJsonRule(): VbenFormSchema['rules'] {
+  return z
+    .union([z.array(z.string()), z.string()])
+    .optional()
+    .transform((value, ctx) => {
+      if (value === undefined || value === null || value === '') return [];
+      if (Array.isArray(value)) return value;
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return [String(value)];
+      }
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '请输入合法数组或单个字符串',
+      });
+      return z.NEVER;
     });
 }
 
@@ -250,25 +271,47 @@ export const formSchema: VbenFormSchema[] = [
     },
   },
   {
-    component: 'Textarea',
+    component: 'ApiSelect',
     fieldName: 'skill_bundle_ids',
     label: 'Skill Bundle 列表',
-    help: 'JSON 数组或对象，例如 ["backend-dev"]',
-    rules: jsonRule(),
+    help: '可多选 Skill Bundle',
+    rules: 'selectRequired',
     componentProps: {
-      placeholder: '["backend-dev"]',
-      rows: 4,
+      api: () =>
+        getHasnSkillBundleListApi({
+          page: 1,
+          size: 100,
+        }),
+      class: 'w-full',
+      allowClear: true,
+      labelField: 'label',
+      valueField: 'value',
+      mode: 'multiple',
+      showSearch: true,
+      placeholder: '选择 Skill Bundle',
+      filterOption: false,
+      afterFetch: (data: {
+        items: { display_name?: string; name: string }[];
+      }) =>
+        data.items.map((item) => ({
+          label: item.display_name || item.name,
+          value: item.name,
+        })),
     },
   },
   {
-    component: 'Textarea',
+    component: 'Select',
     fieldName: 'skill_ids',
     label: 'Skill 列表',
-    help: 'JSON 数组或对象，例如 ["github-pr", "pytest"]',
-    rules: jsonRule(),
+    help: '可多选 Skill',
+    rules: arrayOrJsonRule(),
     componentProps: {
-      placeholder: '["github-pr", "pytest"]',
-      rows: 4,
+      allowClear: true,
+      mode: 'multiple',
+      options: [],
+      placeholder: '选择 Skill',
+      showSearch: true,
+      tokenSeparators: [',', ' '],
     },
   },
   {

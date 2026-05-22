@@ -32,7 +32,26 @@ defineOptions({
 
 type HasnTaskFormValues = HasnTaskCreateParams & { id?: number };
 
-function stringifyJsonFields<T extends Record<string, any>>(data: T): T {
+function normalizeArrayField(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string');
+  }
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(
+          (item): item is string => typeof item === 'string',
+        );
+      }
+    } catch {
+      return [value];
+    }
+  }
+  return [];
+}
+
+function normalizeFormValues<T extends Record<string, any>>(data: T): T {
   return {
     ...data,
     enabled_toolsets:
@@ -40,8 +59,8 @@ function stringifyJsonFields<T extends Record<string, any>>(data: T): T {
         ? undefined
         : JSON.stringify(data.enabled_toolsets, null, 2),
     schedule_config: JSON.stringify(data.schedule_config ?? {}, null, 2),
-    skill_bundle_ids: JSON.stringify(data.skill_bundle_ids ?? [], null, 2),
-    skill_ids: JSON.stringify(data.skill_ids ?? [], null, 2),
+    skill_bundle_ids: normalizeArrayField(data.skill_bundle_ids),
+    skill_ids: normalizeArrayField(data.skill_ids),
   };
 }
 
@@ -155,15 +174,15 @@ const [Modal, modalApi] = useVbenModal({
       formData.value = data;
       formApi.setValues(
         data
-          ? stringifyJsonFields(data)
+          ? normalizeFormValues(data)
           : {
               enabled: true,
               repeat_completed: 0,
               run_count: 0,
               schedule_config: '{}',
               schedule_type: 'once',
-              skill_bundle_ids: '[]',
-              skill_ids: '[]',
+              skill_bundle_ids: [],
+              skill_ids: [],
               state: 'scheduled',
             },
       );
