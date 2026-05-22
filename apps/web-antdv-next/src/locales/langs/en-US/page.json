@@ -16,6 +16,10 @@
   },
   "menu": {
     "system": "System",
+    "hasn": "HASN",
+    "hasnTask": "Tasks",
+    "hasnTaskRun": "Task Runs",
+    "hasnSkillBundle": "Skill Bundles",
     "scheduler": "Scheduler",
     "schedulerManage": "Manage",
     "schedulerRecord": "Record",

@@ -16,6 +16,10 @@
   },
   "menu": {
     "system": "系统管理",
+    "hasn": "HASN 管理",
+    "hasnTask": "任务定义",
+    "hasnTaskRun": "执行记录",
+    "hasnSkillBundle": "Skill Bundle",
     "scheduler": "任务调度",
     "schedulerManage": "任务管理",
     "schedulerRecord": "执行记录",
