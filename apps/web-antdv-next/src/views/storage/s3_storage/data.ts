@@ -55,6 +55,25 @@ export function useColumns(
       minWidth: 120,
     },
     {
+      field: 'access',
+      title: '访问类型',
+      width: 100,
+      formatter: ({ cellValue }) => (cellValue === 'public' ? '公共' : '私有'),
+    },
+    {
+      field: 'sign_strategy',
+      title: '签名策略',
+      width: 140,
+      formatter: ({ cellValue }) => {
+        const map: Record<string, string> = {
+          s3_presign: 'S3 预签名',
+          cdn_timestamp: 'CDN 时间戳',
+          nginx_secure_link: 'Nginx 防盗链',
+        };
+        return map[cellValue as string] ?? (cellValue as string) ?? '';
+      },
+    },
+    {
       field: 'region',
       title: '区域',
       width: 100,
@@ -132,6 +151,35 @@ export const formSchema: VbenFormSchema[] = [
     fieldName: 'bucket',
     label: '存储桶名称',
     rules: 'required',
+  },
+  {
+    component: 'Select',
+    fieldName: 'access',
+    label: '访问类型',
+    defaultValue: 'private',
+    rules: 'required',
+    componentProps: {
+      allowClear: false,
+      options: [
+        { label: '私有（签名访问，如私信附件）', value: 'private' },
+        { label: '公共（CDN 直读不签名，如头像/帖图）', value: 'public' },
+      ],
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'sign_strategy',
+    label: '签名策略',
+    defaultValue: 's3_presign',
+    componentProps: {
+      allowClear: false,
+      placeholder: '私有时生效',
+      options: [
+        { label: 'S3 预签名', value: 's3_presign' },
+        { label: 'CDN 时间戳防盗链', value: 'cdn_timestamp' },
+        { label: 'Nginx 防盗链', value: 'nginx_secure_link' },
+      ],
+    },
   },
   {
     component: 'Input',

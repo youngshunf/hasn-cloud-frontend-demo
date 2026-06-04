@@ -5,6 +5,12 @@ import { requestClient } from '#/api/request';
  */
 
 // Types
+export type S3StorageAccess = 'public' | 'private';
+export type S3StorageSignStrategy =
+  | 's3_presign'
+  | 'cdn_timestamp'
+  | 'nginx_secure_link';
+
 export interface S3Storage {
   id: number;
   name: string;
@@ -15,6 +21,10 @@ export interface S3Storage {
   prefix?: string;
   region?: string;
   cdn_domain?: string;
+  /** 访问类型：public 公开(CDN 直读不签名) / private 私有(签名访问) */
+  access: S3StorageAccess;
+  /** 签名策略（private 时生效） */
+  sign_strategy: S3StorageSignStrategy;
   remark?: string;
   created_time: string;
   updated_time?: string;
@@ -38,6 +48,8 @@ export interface S3StorageCreateParams {
   prefix?: string;
   region?: string;
   cdn_domain?: string;
+  access: S3StorageAccess;
+  sign_strategy: S3StorageSignStrategy;
   remark?: string;
 }
 
