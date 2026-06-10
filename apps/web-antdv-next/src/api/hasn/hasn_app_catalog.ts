@@ -74,21 +74,21 @@ export interface HasnAppCatalogListResult {
 
 // API functions
 export async function getHasnAppCatalogListApi(params: HasnAppCatalogParams): Promise<HasnAppCatalogListResult> {
-  return requestClient.get<HasnAppCatalogListResult>('/api/v1/hasn/app/catalogs', { params });
+  return requestClient.get<HasnAppCatalogListResult>('/api/v1/hasn/hasn/app/catalogs', { params });
 }
 
 export async function getHasnAppCatalogApi(id: number): Promise<HasnAppCatalog> {
-  return requestClient.get<HasnAppCatalog>(`/api/v1/hasn/app/catalogs/${id}`);
+  return requestClient.get<HasnAppCatalog>(`/api/v1/hasn/hasn/app/catalogs/${id}`);
 }
 
 export async function createHasnAppCatalogApi(data: any): Promise<HasnAppCatalog> {
-  return requestClient.post<HasnAppCatalog>('/api/v1/hasn/app/catalogs', data);
+  return requestClient.post<HasnAppCatalog>('/api/v1/hasn/hasn/app/catalogs', data);
 }
 
 export async function updateHasnAppCatalogApi(id: number, data: Partial<HasnAppCatalogCreateParams>): Promise<HasnAppCatalog> {
-  return requestClient.put<HasnAppCatalog>(`/api/v1/hasn/app/catalogs/${id}`, data);
+  return requestClient.put<HasnAppCatalog>(`/api/v1/hasn/hasn/app/catalogs/${id}`, data);
 }
 
 export async function deleteHasnAppCatalogApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/app/catalogs', { data: { pks: [id] } });
+  return requestClient.delete<void>('/api/v1/hasn/hasn/app/catalogs', { data: { pks: [id] } });
 }

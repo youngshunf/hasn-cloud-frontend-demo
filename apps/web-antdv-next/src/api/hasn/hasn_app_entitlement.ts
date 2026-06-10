@@ -46,21 +46,21 @@ export interface HasnAppEntitlementListResult {
 
 // API functions
 export async function getHasnAppEntitlementListApi(params: HasnAppEntitlementParams): Promise<HasnAppEntitlementListResult> {
-  return requestClient.get<HasnAppEntitlementListResult>('/api/v1/hasn/app/entitlements', { params });
+  return requestClient.get<HasnAppEntitlementListResult>('/api/v1/hasn/hasn/app/entitlements', { params });
 }
 
 export async function getHasnAppEntitlementApi(id: number): Promise<HasnAppEntitlement> {
-  return requestClient.get<HasnAppEntitlement>(`/api/v1/hasn/app/entitlements/${id}`);
+  return requestClient.get<HasnAppEntitlement>(`/api/v1/hasn/hasn/app/entitlements/${id}`);
 }
 
 export async function createHasnAppEntitlementApi(data: any): Promise<HasnAppEntitlement> {
-  return requestClient.post<HasnAppEntitlement>('/api/v1/hasn/app/entitlements', data);
+  return requestClient.post<HasnAppEntitlement>('/api/v1/hasn/hasn/app/entitlements', data);
 }
 
 export async function updateHasnAppEntitlementApi(id: number, data: Partial<HasnAppEntitlementCreateParams>): Promise<HasnAppEntitlement> {
-  return requestClient.put<HasnAppEntitlement>(`/api/v1/hasn/app/entitlements/${id}`, data);
+  return requestClient.put<HasnAppEntitlement>(`/api/v1/hasn/hasn/app/entitlements/${id}`, data);
 }
 
 export async function deleteHasnAppEntitlementApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/app/entitlements', { data: { pks: [id] } });
+  return requestClient.delete<void>('/api/v1/hasn/hasn/app/entitlements', { data: { pks: [id] } });
 }
