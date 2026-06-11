@@ -24,6 +24,7 @@ const ALLOWED_MIME = new Set([
   'image/gif',
   'image/jpeg',
   'image/png',
+  'image/svg+xml',
   'image/webp',
 ]);
 const MAX_MB = 10;
@@ -34,7 +35,7 @@ const previewUrl = computed(() => props.modelValue || '');
 
 const beforeUpload: UploadProps['beforeUpload'] = (file) => {
   if (!ALLOWED_MIME.has(file.type)) {
-    message.error('仅支持 jpg、png、gif、webp 格式');
+    message.error('仅支持 jpg、png、gif、webp、svg 格式');
     return false;
   }
   if (file.size / 1024 / 1024 > MAX_MB) {
@@ -71,7 +72,7 @@ function handleRemove() {
     <a-upload
       list-type="picture-card"
       :show-upload-list="false"
-      accept="image/jpeg,image/png,image/gif,image/webp"
+      accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
       :before-upload="beforeUpload"
       :custom-request="customRequest"
     >
