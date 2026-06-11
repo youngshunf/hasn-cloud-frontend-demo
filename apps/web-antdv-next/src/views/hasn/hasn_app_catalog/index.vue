@@ -27,7 +27,12 @@ import {
   updateHasnAppCatalogApi,
 } from '#/api/hasn/hasn_app_catalog';
 
-import { formSchema, querySchema, useColumns } from './data';
+import {
+  formSchema,
+  querySchema,
+  useColumns,
+  withCatalogDefaults,
+} from './data';
 
 defineOptions({
   name: 'HasnAppCatalog',
@@ -119,8 +124,9 @@ const [editModal, editModalApi] = useVbenModal({
     if (valid) {
       editModalApi.lock();
       const data = await editFormApi.getValues<HasnAppCatalogParams>();
+      const payload = withCatalogDefaults(data);
       try {
-        await updateHasnAppCatalogApi(editId.value, data);
+        await updateHasnAppCatalogApi(editId.value, payload);
         message.success($t('ui.actionMessage.operationSuccess'));
         await editModalApi.close();
         onRefresh();
@@ -155,8 +161,9 @@ const [addModal, addModalApi] = useVbenModal({
     if (valid) {
       addModalApi.lock();
       const data = await addFormApi.getValues<HasnAppCatalogParams>();
+      const payload = withCatalogDefaults(data);
       try {
-        await createHasnAppCatalogApi(data);
+        await createHasnAppCatalogApi(payload);
         message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();

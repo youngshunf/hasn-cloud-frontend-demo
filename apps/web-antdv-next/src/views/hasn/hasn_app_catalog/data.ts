@@ -9,6 +9,78 @@ import { $t } from '@vben/locales';
 
 import { getDictOptions } from '#/utils/dict';
 
+import IconUpload from './IconUpload.vue';
+
+/** 枚举字段选项（取值与后端 schema 注释一致） */
+const SOURCE_OPTIONS = [
+  { label: '内置', value: 'builtin' },
+  { label: '官方', value: 'first_party' },
+  { label: '第三方', value: 'third_party' },
+];
+const EXECUTION_MODE_OPTIONS = [
+  { label: '云端', value: 'cloud' },
+  { label: '桌面嵌入', value: 'embedded_desktop' },
+  { label: '本地工具', value: 'local_tool' },
+];
+const SCOPE_OPTIONS = [
+  { label: '个人空间', value: 'personal' },
+  { label: '企业空间', value: 'enterprise' },
+];
+const COLLABORATION_MODE_OPTIONS = [
+  { label: '个人', value: 'none' },
+  { label: '空间共享', value: 'workspace_shared' },
+];
+const MIN_TIER_OPTIONS = [
+  { label: '专业版', value: 'pro' },
+  { label: '进阶版', value: 'advanced' },
+  { label: '旗舰版', value: 'flagship' },
+];
+const PRICE_UNIT_OPTIONS = [
+  { label: '人民币', value: 'cny' },
+  { label: '积分', value: 'credits' },
+];
+const BILLING_CYCLE_OPTIONS = [
+  { label: '一次性', value: 'once' },
+  { label: '包月', value: 'month' },
+  { label: '包年', value: 'year' },
+];
+
+/**
+ * 表单默认值兜底：后端这些字段非空，但管理员通常无需逐项填写。
+ * 提交前与表单值合并，保证未触碰的字段也带上合法默认值（提交侧二次兜底）。
+ */
+export const CATALOG_FORM_DEFAULTS = {
+  icon: 'box',
+  source: 'builtin',
+  status: 'published',
+  execution_mode: 'cloud',
+  scope: ['personal'],
+  collaboration_mode: 'none',
+  sort_order: 0,
+  default_mount: false,
+  access_type: 'free',
+  price_unit: 'cny',
+  billing_cycle: 'once',
+  trial_days: 0,
+  manifest_present: false,
+};
+
+/**
+ * 提交前用默认值兜底：仅填补缺失/未定义的字段，已填字段保持原值。
+ * （注意：跳过 undefined，避免被表单丢弃的隐藏字段覆盖掉合法默认值。）
+ */
+export function withCatalogDefaults<T extends Record<string, any>>(
+  values: T,
+): Record<string, any> {
+  const merged: Record<string, any> = { ...CATALOG_FORM_DEFAULTS };
+  for (const [key, value] of Object.entries(values)) {
+    if (value !== undefined) {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
+
 /**
  * Query form schema
  */
@@ -202,6 +274,13 @@ export function useColumns(
 
 /**
  * Form schema for add/edit
+ *
+ * 优化要点：
+ * - 只把真正必须由人填写的字段标为必填（app_id / name / 图标 token / 描述 / 路由 / 准入类型）。
+ * - 其余后端非空字段统一给默认值（见 CATALOG_FORM_DEFAULTS），管理员无需逐项填写。
+ * - 枚举字段统一用 Select，避免手填非法值；可挂载空间改多选。
+ * - 图标支持上传图片到公共桶（IconUpload），优先于图标 token。
+ * - 计费/订阅相关字段仅在对应准入类型下展示（v-show 隐藏时保留默认值，提交仍合法）。
  */
 export const formSchema: VbenFormSchema[] = [
   {
@@ -209,6 +288,7 @@ export const formSchema: VbenFormSchema[] = [
     fieldName: 'app_id',
     label: '应用唯一标识',
     rules: 'required',
+    help: '与 manifest.app_id / WorkbenchApp.id 一致，例如 hasn_task',
   },
   {
     component: 'Input',
@@ -217,126 +297,173 @@ export const formSchema: VbenFormSchema[] = [
     rules: 'required',
   },
   {
+    component: IconUpload,
+    fieldName: 'icon_asset_uri',
+    label: '应用图标',
+    help: '上传图片到公共桶，设置后优先于图标 token 显示',
+  },
+  {
     component: 'Input',
     fieldName: 'icon',
     label: '图标 token',
     rules: 'required',
+    defaultValue: 'box',
+    help: '未上传图标时使用的兜底 Lucide 图标 token',
   },
   {
-    component: 'Input',
-    fieldName: 'icon_asset_uri',
-    label: '自定义图标资产 URI',
-  },
-  {
-    component: 'Input',
+    component: 'Textarea',
     fieldName: 'description',
     label: '应用描述',
     rules: 'required',
+    componentProps: { rows: 2 },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'source',
     label: '来源',
     rules: 'required',
+    defaultValue: 'builtin',
+    componentProps: { options: SOURCE_OPTIONS },
   },
   {
     component: 'Select',
     fieldName: 'status',
     label: '上架状态',
     rules: 'required',
-    componentProps: {
-      options: getDictOptions('hasn_status'),
-    },
+    defaultValue: 'published',
+    componentProps: { options: getDictOptions('hasn_status') },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'execution_mode',
     label: '执行形态',
     rules: 'required',
+    defaultValue: 'cloud',
+    componentProps: { options: EXECUTION_MODE_OPTIONS },
   },
   {
-    component: 'Textarea',
+    component: 'Select',
     fieldName: 'scope',
-    label: '可挂载空间类型 JSONB',
+    label: '可挂载空间',
     rules: 'required',
-    componentProps: {"placeholder": "Enter JSON", "rows": 6},
+    defaultValue: ['personal'],
+    componentProps: {
+      mode: 'multiple',
+      options: SCOPE_OPTIONS,
+    },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'collaboration_mode',
     label: '协作模式',
     rules: 'required',
+    defaultValue: 'none',
+    componentProps: { options: COLLABORATION_MODE_OPTIONS },
   },
   {
     component: 'Input',
     fieldName: 'entry_route',
     label: '客户端原生路由',
     rules: 'required',
+    help: '客户端内打开应用的路由，例如 /tasks',
   },
   {
     component: 'InputNumber',
     fieldName: 'sort_order',
     label: '工作台排序',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
+    defaultValue: 0,
+    help: '数值小的排在前面',
+    componentProps: { style: 'width: 100%' },
   },
   {
     component: 'Switch',
     fieldName: 'default_mount',
-    label: '新空间是否自动挂载',
+    label: '新空间自动挂载',
+    defaultValue: false,
+    help: '开启后新空间注册即用',
   },
   {
     component: 'Input',
     fieldName: 'requires_role',
     label: '企业空间所需角色',
+    help: '仅企业空间生效，留空表示 member 即可',
   },
   {
     component: 'Select',
     fieldName: 'access_type',
     label: '准入类型',
     rules: 'required',
-    componentProps: {
-      options: getDictOptions('hasn_access_type'),
-    },
+    defaultValue: 'free',
+    componentProps: { options: getDictOptions('hasn_access_type') },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'min_tier',
-    label: '订阅准入所需最低档',
+    label: '所需最低订阅档',
+    componentProps: { allowClear: true, options: MIN_TIER_OPTIONS },
+    dependencies: {
+      show: (values) => values.access_type === 'tier',
+      triggerFields: ['access_type'],
+    },
   },
   {
     component: 'InputNumber',
     fieldName: 'price_amount',
     label: '购买价格',
-    componentProps: {"style": "width: 100%"},
+    componentProps: { min: 0, style: 'width: 100%' },
+    dependencies: {
+      show: (values) => values.access_type === 'purchase',
+      triggerFields: ['access_type'],
+    },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'price_unit',
     label: '计价单位',
-    rules: 'required',
+    defaultValue: 'cny',
+    componentProps: { options: PRICE_UNIT_OPTIONS },
+    dependencies: {
+      show: (values) => values.access_type !== 'free',
+      triggerFields: ['access_type'],
+    },
   },
   {
-    component: 'Input',
+    component: 'Select',
     fieldName: 'billing_cycle',
     label: '计费周期',
-    rules: 'required',
+    defaultValue: 'once',
+    componentProps: { options: BILLING_CYCLE_OPTIONS },
+    dependencies: {
+      show: (values) => values.access_type !== 'free',
+      triggerFields: ['access_type'],
+    },
   },
   {
     component: 'InputNumber',
     fieldName: 'trial_days',
     label: '试用天数',
-    rules: 'required',
-    componentProps: {"style": "width: 100%"},
+    defaultValue: 0,
+    componentProps: { min: 0, style: 'width: 100%' },
+    dependencies: {
+      show: (values) => values.access_type !== 'free',
+      triggerFields: ['access_type'],
+    },
   },
   {
     component: 'Input',
     fieldName: 'sku_ref',
-    label: '对接计费商品/订单 SKU',
+    label: '计费商品/订单 SKU',
+    help: '对接计费系统时填写，可留空',
+    dependencies: {
+      show: (values) => values.access_type !== 'free',
+      triggerFields: ['access_type'],
+    },
   },
   {
     component: 'Switch',
     fieldName: 'manifest_present',
-    label: '是否有对应 code manifest',
+    label: '已部署 code manifest',
+    defaultValue: false,
+    help: '部署期自动回填，一般无需手动设置',
   },
 ];
