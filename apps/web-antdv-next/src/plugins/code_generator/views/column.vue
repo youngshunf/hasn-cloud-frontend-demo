@@ -37,6 +37,8 @@ import {
 import { columnSchema, useColumnColumns } from './data';
 import ExtraModal from './preview.vue';
 
+const generateLoading = ref(false);
+
 const gridOptions: VxeTableGridOptions<CodeGenColumnResult[]> = {
   rowConfig: {
     keyField: 'id',
@@ -44,13 +46,13 @@ const gridOptions: VxeTableGridOptions<CodeGenColumnResult[]> = {
   height: 'auto',
   virtualYConfig: {
     enabled: true,
-    gt: 0,
   },
   pagerConfig: {
     enabled: false,
   },
   columns: useColumnColumns(onActionClick),
   proxyConfig: {
+    autoLoad: false,
     ajax: {
       query: async () => {
         return await getAllCodeGenBusinessColumnApi(drawerApi.getData().pk);
@@ -93,15 +95,31 @@ const [Drawer, drawerApi] = useVbenDrawer({
   cancelText: '预览',
   confirmText: '下载',
   class: 'w-2/3',
+  onOpenChange(isOpen) {
+    if (isOpen) {
+      gridApi.setLoading(true);
+    }
+  },
+  async onOpened() {
+    try {
+      await gridApi.query();
+    } finally {
+      gridApi.setLoading(false);
+    }
+  },
   onCancel: () => {
     previewModalApi.setData({ pk: drawerApi.getData().pk }).open();
   },
   onConfirm: async () => {
+    drawerApi.setState({ confirmLoading: true });
     try {
       const res = await downloadCodeApi(drawerApi.getData().pk);
       downloadFileFromBlob({ fileName: 'fba_generator', source: res });
+      message.success('代码包已开始下载');
     } catch (error) {
       console.error(error);
+    } finally {
+      drawerApi.setState({ confirmLoading: false });
     }
   },
 });
@@ -147,11 +165,14 @@ async function showGenerate() {
     confirmText: '不怂！就是干',
   })
     .then(async () => {
+      generateLoading.value = true;
       try {
         await generateCodeApi(drawerApi.getData().pk);
         message.success($t('ui.actionMessage.operationSuccess'));
       } catch (error) {
         console.error(error);
+      } finally {
+        generateLoading.value = false;
       }
     })
     .catch(() => {});
@@ -218,7 +239,7 @@ const [PreviewModal, previewModalApi] = useVbenModal({
   <Drawer title="业务模型列">
     <Grid />
     <template #extra>
-      <a-alert :show-icon="false" class="mr-3">
+      <a-alert :show-icon="false">
         <template #title>
           主键 ID 列状态：<a-tag color="success">自动生成</a-tag>
           默认时间列状态：
@@ -229,13 +250,15 @@ const [PreviewModal, previewModalApi] = useVbenModal({
           </a-tag>
         </template>
       </a-alert>
-      <VbenButton @click="modalApi.setData(null).open()">
+      <VbenButton @click="modalApi.setData(null).open()" class="ml-3">
         <MaterialSymbolsAdd class="size-5" />
         新增模型列
       </VbenButton>
     </template>
     <template #center-footer>
-      <a-button type="primary" @click="showGenerate">生成</a-button>
+      <a-button :loading="generateLoading" type="primary" @click="showGenerate">
+        生成
+      </a-button>
     </template>
   </Drawer>
   <Modal :title="modalTile">

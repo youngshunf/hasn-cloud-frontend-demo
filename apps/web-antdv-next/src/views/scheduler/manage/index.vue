@@ -14,7 +14,6 @@ import { MaterialSymbolsAdd } from '@vben/icons';
 import { $t } from '@vben/locales';
 
 import { message } from 'antdv-next';
-import { Cron } from 'croner';
 import dayjs from 'dayjs';
 
 import { useVbenForm } from '#/adapter/form';
@@ -32,55 +31,13 @@ import { useWebSocketStore } from '#/store';
 import CronBuilder from '#/views/scheduler/manage/cron-builder.vue';
 
 import { createSchema, querySchema, useColumns } from './data';
+import { getNextRuns, getScheduleLabel } from './schedule';
 
 const wsStore = useWebSocketStore();
 
 const taskWorkerStatus = ref<any[]>([]);
-
-const periodLabelMap: Record<string, string> = {
-  days: '天',
-  hours: '小时',
-  minutes: '分钟',
-  seconds: '秒',
-};
-
-const periodToSeconds: Record<string, number> = {
-  days: 86_400,
-  hours: 3600,
-  minutes: 60,
-  seconds: 1,
-};
-
-function getScheduleLabel(row: TaskSchedulerResult): string {
-  if (row.type === 0) {
-    const label =
-      periodLabelMap[row.interval_period || 'seconds'] || row.interval_period;
-    return `每 ${row.interval_every || '?'} ${label}`;
-  }
-  return row.crontab || '';
-}
-
-function getNextRuns(row: TaskSchedulerResult): Date[] {
-  try {
-    if (row.type === 0) {
-      const every = row.interval_every;
-      const period = row.interval_period || 'seconds';
-      if (!every || every <= 0) return [];
-      const intervalMs = every * (periodToSeconds[period] || 1) * 1000;
-      const baseTime = row.last_run_time
-        ? new Date(row.last_run_time)
-        : new Date();
-      return Array.from(
-        { length: 5 },
-        (_, i) => new Date(baseTime.getTime() + intervalMs * (i + 1)),
-      );
-    }
-    if (!row.crontab) return [];
-    return new Cron(row.crontab).nextRuns(5);
-  } catch {
-    return [];
-  }
-}
+const executeLoadingMap = ref<Record<number, boolean>>({});
+const statusLoadingMap = ref<Record<number, boolean>>({});
 
 const formOptions: VbenFormProps = {
   collapsed: true,
@@ -101,12 +58,15 @@ function onActionClick({
         icon: 'warning',
         content: '确认删除此任务计划吗？',
       }).then(async () => {
+        gridApi.setLoading(true);
         try {
           await deleteTaskSchedulerApi(row.id);
           message.success($t('ui.actionMessage.deleteSuccess'));
           onRefresh();
         } catch (error) {
           console.error(error);
+        } finally {
+          gridApi.setLoading(false);
         }
       });
       break;
@@ -224,7 +184,7 @@ const [Modal, modalApi] = useVbenModal({
           data.start_time = dayjs(data.start_time, 'YYYY-MM-DD HH:mm:ss');
         }
         if (data.expire_time) {
-          data.expire_time = dayjs(data.start_time, 'YYYY-MM-DD HH:mm:ss');
+          data.expire_time = dayjs(data.expire_time, 'YYYY-MM-DD HH:mm:ss');
         }
         formApi.setValues(data);
       }
@@ -233,11 +193,14 @@ const [Modal, modalApi] = useVbenModal({
 });
 
 const executeTask = async (pk: number) => {
+  executeLoadingMap.value[pk] = true;
   try {
     await executeTaskSchedulerApi(pk);
     message.success('执行成功，任务已下发');
   } catch (error) {
     console.error(error);
+  } finally {
+    executeLoadingMap.value[pk] = false;
   }
 };
 
@@ -245,15 +208,25 @@ const searchLog = (task: string) => {
   router.push({ path: '/scheduler/record', query: { name: task } });
 };
 
-const handleStatusChange = async (row: TaskSchedulerResult) => {
+const handleStatusChange = async (
+  row: TaskSchedulerResult,
+  checked: boolean,
+) => {
+  statusLoadingMap.value[row.id] = true;
   try {
     await updateTaskSchedulerStatusApi(row.id);
+    row.enabled = checked;
     message.success($t('ui.actionMessage.operationSuccess'));
-    onRefresh();
   } catch (error) {
     console.error(error);
+  } finally {
+    statusLoadingMap.value[row.id] = false;
   }
 };
+
+function onEnabledChange(row: TaskSchedulerResult, checked: boolean) {
+  handleStatusChange(row, checked);
+}
 
 let cleanupWS: (() => void) | null = null;
 const intervalId = ref<any>(null);
@@ -312,11 +285,13 @@ onUnmounted(() => {
       </template>
       <template #enabled="{ row }">
         <a-switch
-          v-model:checked="row.enabled"
+          :checked="row.enabled"
           :checked-value="true"
+          :un-checked-value="false"
           checked-children="启用"
           un-checked-children="禁用"
-          @click="handleStatusChange(row)"
+          :loading="!!statusLoadingMap[row.id]"
+          @change="onEnabledChange(row, $event)"
         />
       </template>
       <template #total_run_count="{ row }">
@@ -329,7 +304,12 @@ onUnmounted(() => {
         >
           <a-button size="small" disabled>执行</a-button>
         </a-tooltip>
-        <a-button v-else size="small" @click="executeTask(row.id)">
+        <a-button
+          v-else
+          size="small"
+          :loading="!!executeLoadingMap[row.id]"
+          @click="executeTask(row.id)"
+        >
           执行
         </a-button>
       </template>
