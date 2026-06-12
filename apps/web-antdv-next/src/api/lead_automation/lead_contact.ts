@@ -96,22 +96,33 @@ export interface LeadContactListResult {
 }
 
 // API functions
-export async function getLeadContactListApi(params: LeadContactParams): Promise<LeadContactListResult> {
-  return requestClient.get<LeadContactListResult>('/api/v1/lead-automation/lead/contacts', { params });
+export async function getLeadContactListApi(
+  params: LeadContactParams,
+): Promise<LeadContactListResult> {
+  return requestClient.get<LeadContactListResult>(
+    '/api/v1/growth/lead/contacts',
+    { params },
+  );
 }
 
 export async function getLeadContactApi(id: number): Promise<LeadContact> {
-  return requestClient.get<LeadContact>(`/api/v1/lead-automation/lead/contacts/${id}`);
+  return requestClient.get<LeadContact>(`/api/v1/growth/lead/contacts/${id}`);
 }
 
 export async function createLeadContactApi(data: any): Promise<LeadContact> {
-  return requestClient.post<LeadContact>('/api/v1/lead-automation/lead/contacts', data);
+  return requestClient.post<LeadContact>('/api/v1/growth/lead/contacts', data);
 }
 
-export async function updateLeadContactApi(id: number, data: Partial<LeadContactCreateParams>): Promise<LeadContact> {
-  return requestClient.put<LeadContact>(`/api/v1/lead-automation/lead/contacts/${id}`, data);
+export async function updateLeadContactApi(
+  id: number,
+  data: Partial<LeadContactCreateParams>,
+): Promise<LeadContact> {
+  return requestClient.put<LeadContact>(
+    `/api/v1/growth/lead/contacts/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadContactApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/contacts/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead/contacts/${id}`);
 }

@@ -33,22 +33,42 @@ export interface LeadExportItemListResult {
 }
 
 // API functions
-export async function getLeadExportItemListApi(params: LeadExportItemParams): Promise<LeadExportItemListResult> {
-  return requestClient.get<LeadExportItemListResult>('/api/v1/lead-automation/lead/export/items', { params });
+export async function getLeadExportItemListApi(
+  params: LeadExportItemParams,
+): Promise<LeadExportItemListResult> {
+  return requestClient.get<LeadExportItemListResult>(
+    '/api/v1/growth/lead/export/items',
+    { params },
+  );
 }
 
-export async function getLeadExportItemApi(id: number): Promise<LeadExportItem> {
-  return requestClient.get<LeadExportItem>(`/api/v1/lead-automation/lead/export/items/${id}`);
+export async function getLeadExportItemApi(
+  id: number,
+): Promise<LeadExportItem> {
+  return requestClient.get<LeadExportItem>(
+    `/api/v1/growth/lead/export/items/${id}`,
+  );
 }
 
-export async function createLeadExportItemApi(data: any): Promise<LeadExportItem> {
-  return requestClient.post<LeadExportItem>('/api/v1/lead-automation/lead/export/items', data);
+export async function createLeadExportItemApi(
+  data: any,
+): Promise<LeadExportItem> {
+  return requestClient.post<LeadExportItem>(
+    '/api/v1/growth/lead/export/items',
+    data,
+  );
 }
 
-export async function updateLeadExportItemApi(id: number, data: Partial<LeadExportItemCreateParams>): Promise<LeadExportItem> {
-  return requestClient.put<LeadExportItem>(`/api/v1/lead-automation/lead/export/items/${id}`, data);
+export async function updateLeadExportItemApi(
+  id: number,
+  data: Partial<LeadExportItemCreateParams>,
+): Promise<LeadExportItem> {
+  return requestClient.put<LeadExportItem>(
+    `/api/v1/growth/lead/export/items/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadExportItemApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/export/items/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead/export/items/${id}`);
 }

@@ -49,22 +49,42 @@ export interface LeadSourceConfigListResult {
 }
 
 // API functions
-export async function getLeadSourceConfigListApi(params: LeadSourceConfigParams): Promise<LeadSourceConfigListResult> {
-  return requestClient.get<LeadSourceConfigListResult>('/api/v1/lead-automation/lead-source-configs', { params });
+export async function getLeadSourceConfigListApi(
+  params: LeadSourceConfigParams,
+): Promise<LeadSourceConfigListResult> {
+  return requestClient.get<LeadSourceConfigListResult>(
+    '/api/v1/growth/lead-source-configs',
+    { params },
+  );
 }
 
-export async function getLeadSourceConfigApi(id: number): Promise<LeadSourceConfig> {
-  return requestClient.get<LeadSourceConfig>(`/api/v1/lead-automation/lead-source-configs/${id}`);
+export async function getLeadSourceConfigApi(
+  id: number,
+): Promise<LeadSourceConfig> {
+  return requestClient.get<LeadSourceConfig>(
+    `/api/v1/growth/lead-source-configs/${id}`,
+  );
 }
 
-export async function createLeadSourceConfigApi(data: any): Promise<LeadSourceConfig> {
-  return requestClient.post<LeadSourceConfig>('/api/v1/lead-automation/lead-source-configs', data);
+export async function createLeadSourceConfigApi(
+  data: any,
+): Promise<LeadSourceConfig> {
+  return requestClient.post<LeadSourceConfig>(
+    '/api/v1/growth/lead-source-configs',
+    data,
+  );
 }
 
-export async function updateLeadSourceConfigApi(id: number, data: Partial<LeadSourceConfigCreateParams>): Promise<LeadSourceConfig> {
-  return requestClient.put<LeadSourceConfig>(`/api/v1/lead-automation/lead-source-configs/${id}`, data);
+export async function updateLeadSourceConfigApi(
+  id: number,
+  data: Partial<LeadSourceConfigCreateParams>,
+): Promise<LeadSourceConfig> {
+  return requestClient.put<LeadSourceConfig>(
+    `/api/v1/growth/lead-source-configs/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadSourceConfigApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead-source-configs/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead-source-configs/${id}`);
 }

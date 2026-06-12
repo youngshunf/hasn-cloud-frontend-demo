@@ -69,22 +69,44 @@ export interface LeadCollectionJobListResult {
 }
 
 // API functions
-export async function getLeadCollectionJobListApi(params: LeadCollectionJobParams): Promise<LeadCollectionJobListResult> {
-  return requestClient.get<LeadCollectionJobListResult>('/api/v1/lead-automation/lead/collection/jobs', { params });
+export async function getLeadCollectionJobListApi(
+  params: LeadCollectionJobParams,
+): Promise<LeadCollectionJobListResult> {
+  return requestClient.get<LeadCollectionJobListResult>(
+    '/api/v1/growth/lead/collection/jobs',
+    { params },
+  );
 }
 
-export async function getLeadCollectionJobApi(id: number): Promise<LeadCollectionJob> {
-  return requestClient.get<LeadCollectionJob>(`/api/v1/lead-automation/lead/collection/jobs/${id}`);
+export async function getLeadCollectionJobApi(
+  id: number,
+): Promise<LeadCollectionJob> {
+  return requestClient.get<LeadCollectionJob>(
+    `/api/v1/growth/lead/collection/jobs/${id}`,
+  );
 }
 
-export async function createLeadCollectionJobApi(data: any): Promise<LeadCollectionJob> {
-  return requestClient.post<LeadCollectionJob>('/api/v1/lead-automation/lead/collection/jobs', data);
+export async function createLeadCollectionJobApi(
+  data: any,
+): Promise<LeadCollectionJob> {
+  return requestClient.post<LeadCollectionJob>(
+    '/api/v1/growth/lead/collection/jobs',
+    data,
+  );
 }
 
-export async function updateLeadCollectionJobApi(id: number, data: Partial<LeadCollectionJobCreateParams>): Promise<LeadCollectionJob> {
-  return requestClient.put<LeadCollectionJob>(`/api/v1/lead-automation/lead/collection/jobs/${id}`, data);
+export async function updateLeadCollectionJobApi(
+  id: number,
+  data: Partial<LeadCollectionJobCreateParams>,
+): Promise<LeadCollectionJob> {
+  return requestClient.put<LeadCollectionJob>(
+    `/api/v1/growth/lead/collection/jobs/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadCollectionJobApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/collection/jobs/${id}`);
+  return requestClient.delete<void>(
+    `/api/v1/growth/lead/collection/jobs/${id}`,
+  );
 }

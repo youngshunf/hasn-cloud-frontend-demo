@@ -68,22 +68,40 @@ export interface LeadRawRecordListResult {
 }
 
 // API functions
-export async function getLeadRawRecordListApi(params: LeadRawRecordParams): Promise<LeadRawRecordListResult> {
-  return requestClient.get<LeadRawRecordListResult>('/api/v1/lead-automation/lead/raw/records', { params });
+export async function getLeadRawRecordListApi(
+  params: LeadRawRecordParams,
+): Promise<LeadRawRecordListResult> {
+  return requestClient.get<LeadRawRecordListResult>(
+    '/api/v1/growth/lead/raw/records',
+    { params },
+  );
 }
 
 export async function getLeadRawRecordApi(id: number): Promise<LeadRawRecord> {
-  return requestClient.get<LeadRawRecord>(`/api/v1/lead-automation/lead/raw/records/${id}`);
+  return requestClient.get<LeadRawRecord>(
+    `/api/v1/growth/lead/raw/records/${id}`,
+  );
 }
 
-export async function createLeadRawRecordApi(data: any): Promise<LeadRawRecord> {
-  return requestClient.post<LeadRawRecord>('/api/v1/lead-automation/lead/raw/records', data);
+export async function createLeadRawRecordApi(
+  data: any,
+): Promise<LeadRawRecord> {
+  return requestClient.post<LeadRawRecord>(
+    '/api/v1/growth/lead/raw/records',
+    data,
+  );
 }
 
-export async function updateLeadRawRecordApi(id: number, data: Partial<LeadRawRecordCreateParams>): Promise<LeadRawRecord> {
-  return requestClient.put<LeadRawRecord>(`/api/v1/lead-automation/lead/raw/records/${id}`, data);
+export async function updateLeadRawRecordApi(
+  id: number,
+  data: Partial<LeadRawRecordCreateParams>,
+): Promise<LeadRawRecord> {
+  return requestClient.put<LeadRawRecord>(
+    `/api/v1/growth/lead/raw/records/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadRawRecordApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/raw/records/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead/raw/records/${id}`);
 }

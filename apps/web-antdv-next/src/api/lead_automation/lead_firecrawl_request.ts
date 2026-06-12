@@ -64,22 +64,44 @@ export interface LeadFirecrawlRequestListResult {
 }
 
 // API functions
-export async function getLeadFirecrawlRequestListApi(params: LeadFirecrawlRequestParams): Promise<LeadFirecrawlRequestListResult> {
-  return requestClient.get<LeadFirecrawlRequestListResult>('/api/v1/lead-automation/lead/firecrawl/requests', { params });
+export async function getLeadFirecrawlRequestListApi(
+  params: LeadFirecrawlRequestParams,
+): Promise<LeadFirecrawlRequestListResult> {
+  return requestClient.get<LeadFirecrawlRequestListResult>(
+    '/api/v1/growth/lead/firecrawl/requests',
+    { params },
+  );
 }
 
-export async function getLeadFirecrawlRequestApi(id: number): Promise<LeadFirecrawlRequest> {
-  return requestClient.get<LeadFirecrawlRequest>(`/api/v1/lead-automation/lead/firecrawl/requests/${id}`);
+export async function getLeadFirecrawlRequestApi(
+  id: number,
+): Promise<LeadFirecrawlRequest> {
+  return requestClient.get<LeadFirecrawlRequest>(
+    `/api/v1/growth/lead/firecrawl/requests/${id}`,
+  );
 }
 
-export async function createLeadFirecrawlRequestApi(data: any): Promise<LeadFirecrawlRequest> {
-  return requestClient.post<LeadFirecrawlRequest>('/api/v1/lead-automation/lead/firecrawl/requests', data);
+export async function createLeadFirecrawlRequestApi(
+  data: any,
+): Promise<LeadFirecrawlRequest> {
+  return requestClient.post<LeadFirecrawlRequest>(
+    '/api/v1/growth/lead/firecrawl/requests',
+    data,
+  );
 }
 
-export async function updateLeadFirecrawlRequestApi(id: number, data: Partial<LeadFirecrawlRequestCreateParams>): Promise<LeadFirecrawlRequest> {
-  return requestClient.put<LeadFirecrawlRequest>(`/api/v1/lead-automation/lead/firecrawl/requests/${id}`, data);
+export async function updateLeadFirecrawlRequestApi(
+  id: number,
+  data: Partial<LeadFirecrawlRequestCreateParams>,
+): Promise<LeadFirecrawlRequest> {
+  return requestClient.put<LeadFirecrawlRequest>(
+    `/api/v1/growth/lead/firecrawl/requests/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadFirecrawlRequestApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/firecrawl/requests/${id}`);
+  return requestClient.delete<void>(
+    `/api/v1/growth/lead/firecrawl/requests/${id}`,
+  );
 }

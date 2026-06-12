@@ -47,22 +47,38 @@ export interface LeadAuditLogListResult {
 }
 
 // API functions
-export async function getLeadAuditLogListApi(params: LeadAuditLogParams): Promise<LeadAuditLogListResult> {
-  return requestClient.get<LeadAuditLogListResult>('/api/v1/lead-automation/lead/audit/logs', { params });
+export async function getLeadAuditLogListApi(
+  params: LeadAuditLogParams,
+): Promise<LeadAuditLogListResult> {
+  return requestClient.get<LeadAuditLogListResult>(
+    '/api/v1/growth/lead/audit/logs',
+    { params },
+  );
 }
 
 export async function getLeadAuditLogApi(id: number): Promise<LeadAuditLog> {
-  return requestClient.get<LeadAuditLog>(`/api/v1/lead-automation/lead/audit/logs/${id}`);
+  return requestClient.get<LeadAuditLog>(
+    `/api/v1/growth/lead/audit/logs/${id}`,
+  );
 }
 
 export async function createLeadAuditLogApi(data: any): Promise<LeadAuditLog> {
-  return requestClient.post<LeadAuditLog>('/api/v1/lead-automation/lead/audit/logs', data);
+  return requestClient.post<LeadAuditLog>(
+    '/api/v1/growth/lead/audit/logs',
+    data,
+  );
 }
 
-export async function updateLeadAuditLogApi(id: number, data: Partial<LeadAuditLogCreateParams>): Promise<LeadAuditLog> {
-  return requestClient.put<LeadAuditLog>(`/api/v1/lead-automation/lead/audit/logs/${id}`, data);
+export async function updateLeadAuditLogApi(
+  id: number,
+  data: Partial<LeadAuditLogCreateParams>,
+): Promise<LeadAuditLog> {
+  return requestClient.put<LeadAuditLog>(
+    `/api/v1/growth/lead/audit/logs/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadAuditLogApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/audit/logs/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead/audit/logs/${id}`);
 }

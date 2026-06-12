@@ -51,22 +51,42 @@ export interface LeadExportBatchListResult {
 }
 
 // API functions
-export async function getLeadExportBatchListApi(params: LeadExportBatchParams): Promise<LeadExportBatchListResult> {
-  return requestClient.get<LeadExportBatchListResult>('/api/v1/lead-automation/lead/export/batchs', { params });
+export async function getLeadExportBatchListApi(
+  params: LeadExportBatchParams,
+): Promise<LeadExportBatchListResult> {
+  return requestClient.get<LeadExportBatchListResult>(
+    '/api/v1/growth/lead/export/batchs',
+    { params },
+  );
 }
 
-export async function getLeadExportBatchApi(id: number): Promise<LeadExportBatch> {
-  return requestClient.get<LeadExportBatch>(`/api/v1/lead-automation/lead/export/batchs/${id}`);
+export async function getLeadExportBatchApi(
+  id: number,
+): Promise<LeadExportBatch> {
+  return requestClient.get<LeadExportBatch>(
+    `/api/v1/growth/lead/export/batchs/${id}`,
+  );
 }
 
-export async function createLeadExportBatchApi(data: any): Promise<LeadExportBatch> {
-  return requestClient.post<LeadExportBatch>('/api/v1/lead-automation/lead/export/batchs', data);
+export async function createLeadExportBatchApi(
+  data: any,
+): Promise<LeadExportBatch> {
+  return requestClient.post<LeadExportBatch>(
+    '/api/v1/growth/lead/export/batchs',
+    data,
+  );
 }
 
-export async function updateLeadExportBatchApi(id: number, data: Partial<LeadExportBatchCreateParams>): Promise<LeadExportBatch> {
-  return requestClient.put<LeadExportBatch>(`/api/v1/lead-automation/lead/export/batchs/${id}`, data);
+export async function updateLeadExportBatchApi(
+  id: number,
+  data: Partial<LeadExportBatchCreateParams>,
+): Promise<LeadExportBatch> {
+  return requestClient.put<LeadExportBatch>(
+    `/api/v1/growth/lead/export/batchs/${id}`,
+    data,
+  );
 }
 
 export async function deleteLeadExportBatchApi(id: number): Promise<void> {
-  return requestClient.delete<void>(`/api/v1/lead-automation/lead/export/batchs/${id}`);
+  return requestClient.delete<void>(`/api/v1/growth/lead/export/batchs/${id}`);
 }
