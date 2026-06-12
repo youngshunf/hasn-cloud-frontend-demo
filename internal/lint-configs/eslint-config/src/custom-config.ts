@@ -1,12 +1,15 @@
 import type { Linter } from 'eslint';
 
-const restrictedImportIgnores = [
-  '**/vite.config.mts',
-  '**/tailwind.config.mjs',
-  '**/postcss.config.mjs',
-];
+const restrictedImportIgnores = ['**/vite.config.mts'];
 
 const customConfig: Linter.Config[] = [
+  {
+    files: ['apps/web-antdv-next/src/types/antd.d.ts'],
+    rules: {
+      'spaced-comment': 'off',
+      'unicorn/no-empty-file': 'off',
+    },
+  },
   // shadcn-ui 内部组件是自动生成的，不做太多限制
   {
     files: ['packages/@core/ui-kit/shadcn-ui/**/**'],
@@ -25,14 +28,6 @@ const customConfig: Linter.Config[] = [
     ignores: restrictedImportIgnores,
     rules: {
       'perfectionist/sort-interfaces': 'off',
-      'perfectionist/sort-objects': 'off',
-    },
-  },
-  {
-    files: ['**/**.vue'],
-    ignores: restrictedImportIgnores,
-    rules: {
-      'perfectionist/sort-objects': 'off',
     },
   },
   {
@@ -67,7 +62,6 @@ const customConfig: Linter.Config[] = [
           ],
         },
       ],
-      'perfectionist/sort-interfaces': 'off',
     },
   },
   {
@@ -141,19 +135,12 @@ const customConfig: Linter.Config[] = [
   {
     files: ['apps/backend-mock/**/**', 'docs/**/**'],
     rules: {
-      '@typescript-eslint/no-extraneous-class': 'off',
-      'n/no-extraneous-import': 'off',
-      'n/prefer-global/buffer': 'off',
-      'n/prefer-global/process': 'off',
       'no-console': 'off',
-      'unicorn/prefer-module': 'off',
     },
   },
   {
     files: ['**/**/playwright.config.ts'],
     rules: {
-      'n/prefer-global/buffer': 'off',
-      'n/prefer-global/process': 'off',
       'no-console': 'off',
     },
   },
@@ -161,6 +148,12 @@ const customConfig: Linter.Config[] = [
     files: ['internal/**/**', 'scripts/**/**'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['packages/@core/base/shared/src/utils/inference.ts'],
+    rules: {
+      'vue/prefer-import-from-vue': 'off',
     },
   },
 ];

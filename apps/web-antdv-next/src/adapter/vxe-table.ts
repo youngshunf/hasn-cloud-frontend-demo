@@ -1,24 +1,20 @@
 import type { VxeTableGridOptions } from '@vben/plugins/vxe-table';
 import type { Recordable } from '@vben/types';
 
+import type { ComponentPropsMap, ComponentType } from './component';
+
 import { h } from 'vue';
 
 import { IconifyIcon } from '@vben/icons';
 import { $te } from '@vben/locales';
-import { setupVbenVxeTable, useVbenVxeGrid } from '@vben/plugins/vxe-table';
+import {
+  setupVbenVxeTable,
+  useVbenVxeGrid as useGrid,
+} from '@vben/plugins/vxe-table';
 import { get, isFunction, isString } from '@vben/utils';
 
 import { objectOmit } from '@vueuse/core';
-import {
-  Button,
-  Dropdown,
-  Image,
-  Menu,
-  MenuItem,
-  Popconfirm,
-  Switch,
-  Tag,
-} from 'antdv-next';
+import { Button, Dropdown, Image, Popconfirm, Switch, Tag } from 'antdv-next';
 
 import { $t } from '#/locales';
 import { DictEnum, getDictOptions } from '#/utils/dict';
@@ -132,19 +128,10 @@ setupVbenVxeTable({
       renderTableDefault({ attrs, options, props }, { column, row }) {
         const defaultProps = { size: 'small', type: 'link', ...props };
         let align = 'end';
-        switch (column.align) {
-          case 'center': {
-            align = 'center';
-            break;
-          }
-          case 'left': {
-            align = 'start';
-            break;
-          }
-          default: {
-            align = 'end';
-            break;
-          }
+        if (column.align === 'center') {
+          align = 'center';
+        } else if (column.align === 'left') {
+          align = 'start';
         }
         const presets: Recordable<Recordable<any>> = {
           delete: {
@@ -236,19 +223,12 @@ setupVbenVxeTable({
 
         function renderDropdown(opt: Recordable<any>) {
           const menuItems =
-            opt.items?.map((item: Recordable<any>) =>
-              h(
-                MenuItem,
-                {
-                  key: item.code || item.text,
-                  icon: item.icon ?? undefined,
-                  disabled: item.disabled ?? undefined,
-                },
-                {
-                  default: () => item.text,
-                },
-              ),
-            ) || [];
+            opt.items?.map((item: Recordable<any>) => ({
+              key: item.code || item.text,
+              label: item.text,
+              icon: item.icon ?? undefined,
+              disabled: item.disabled ?? undefined,
+            })) || [];
 
           return h(
             Dropdown,
@@ -265,24 +245,16 @@ setupVbenVxeTable({
                 );
               },
               placement: 'bottomLeft',
+              ...props,
               ...opt,
+              menu: {
+                items: menuItems,
+                onClick: ({ key }: { key: string }) =>
+                  attrs?.onClick?.({ code: key, row }),
+              },
             },
             {
               default: () => renderBtn({ ...opt, icon: 'tabler:dots' }, false),
-              overlay: () =>
-                h(
-                  Menu,
-                  {
-                    onClick: () =>
-                      attrs?.onClick?.({
-                        code: opt.code,
-                        row,
-                      }),
-                  },
-                  {
-                    default: () => menuItems,
-                  },
-                ),
             },
           );
         }
@@ -313,7 +285,9 @@ setupVbenVxeTable({
   useVbenForm,
 });
 
-export { useVbenVxeGrid };
+export const useVbenVxeGrid = <T extends Record<string, any>>(
+  ...rest: Parameters<typeof useGrid<T, ComponentType, ComponentPropsMap>>
+) => useGrid<T, ComponentType, ComponentPropsMap>(...rest);
 
 export type OnActionClickParams<T = Recordable<any>> = {
   code: string;

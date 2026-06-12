@@ -10,6 +10,8 @@ import { computed } from 'vue';
 import { useVbenModal, VbenButton } from '@vben/common-ui';
 import { useUserStore } from '@vben/stores';
 
+import { message } from 'antdv-next';
+
 import { useVbenForm } from '#/adapter/form';
 import {
   updateSysUserEmailApi,
@@ -25,7 +27,7 @@ const userStore = useUserStore();
 
 const securityOptions = computed(() => [
   {
-    class: 'icon-[fluent--phone-48-regular] mt-1.5',
+    class: 'icon-[fluent--phone-48-regular]',
     title: '安全手机',
     description: '手机号可用于登录、身份验证、密码找回、通知接收',
     type: 'phone',
@@ -33,7 +35,7 @@ const securityOptions = computed(() => [
     statusString: userStore.userInfo?.phone ? '已绑定' : '未绑定',
   },
   {
-    class: 'icon-[ic--outline-email] mt-1.5',
+    class: 'icon-[ic--outline-email]',
     title: '安全邮箱',
     description: '邮箱可用于登录、身份验证、密码找回、通知接收',
     type: 'email',
@@ -41,7 +43,7 @@ const securityOptions = computed(() => [
     statusString: userStore.userInfo?.email ? '已绑定' : '未绑定',
   },
   {
-    class: 'icon-[mdi--password-outline] mt-1.5',
+    class: 'icon-[mdi--password-outline]',
     title: '登录密码',
     description: '为了您的账号安全，建议定期修改密码',
     type: 'password',
@@ -65,6 +67,7 @@ const [phoneModal, phoneModalApi] = useVbenModal({
       const data = await phoneFormApi.getValues<SysUpdateUserPhoneParams>();
       try {
         await updateSysUserPhoneApi(data);
+        message.success('手机号更新成功');
         await phoneModalApi.close();
         await authStore.fetchUserInfo();
       } finally {
@@ -98,6 +101,7 @@ const [emailModal, emailModalApi] = useVbenModal({
       const data = await emailFormApi.getValues<SysUpdateUserEmailParams>();
       try {
         await updateSysUserEmailApi(data);
+        message.success('邮箱更新成功');
         await emailModalApi.close();
         await authStore.fetchUserInfo();
       } finally {
@@ -131,6 +135,7 @@ const [passwordModal, passwordModalApi] = useVbenModal({
       const data = await passwordFormApi.getValues<SysUpdatePasswordParams>();
       try {
         await updateSysUserPasswordApi(data);
+        message.success('密码更新成功，请重新登录');
         await passwordModalApi.close();
         await authStore.logout(false);
       } finally {
