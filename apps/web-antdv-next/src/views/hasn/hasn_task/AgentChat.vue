@@ -1,67 +1,9 @@
-<template>
-  <div class="agent-chat">
-    <div class="chat-header">
-      <a-button type="text" @click="goBack">
-        <template #icon>
-          <ArrowLeftOutlined />
-        </template>
-      </a-button>
-      <div class="header-info">
-        <h3>{{ sessionTitle }}</h3>
-        <a-tag :color="getStatusColor(sessionStatus)">
-          {{ getStatusLabel(sessionStatus) }}
-        </a-tag>
-      </div>
-    </div>
-
-    <div ref="messagesContainer" class="messages-container">
-      <div v-for="msg in messages" :key="msg.message_id" class="message-item">
-        <div :class="['message-bubble', msg.role]">
-          <div class="message-role">{{ getRoleLabel(msg.role) }}</div>
-          <div class="message-content">{{ msg.content_text }}</div>
-          <div class="message-time">{{ formatTime(msg.created_at) }}</div>
-        </div>
-      </div>
-
-      <div v-if="streamingMessage" class="message-item">
-        <div class="message-bubble assistant streaming">
-          <div class="message-role">Agent</div>
-          <div class="message-content">{{ streamingMessage }}</div>
-          <div class="message-time">正在输入...</div>
-        </div>
-      </div>
-
-      <div v-if="loading && messages.length === 0" class="loading-placeholder">
-        <a-spin />
-        <span>加载消息中...</span>
-      </div>
-    </div>
-
-    <div class="input-container">
-      <a-textarea
-        v-model:value="inputMessage"
-        :rows="3"
-        placeholder="输入消息..."
-        :disabled="sending || sessionStatus !== 'active'"
-        @keydown.enter.ctrl="sendMessage"
-      />
-      <a-button
-        type="primary"
-        :loading="sending"
-        :disabled="!inputMessage.trim() || sessionStatus !== 'active'"
-        @click="sendMessage"
-      >
-        发送 (Ctrl+Enter)
-      </a-button>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { message } from 'ant-design-vue';
+
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
+import { message } from 'antdv-next';
 
 interface Message {
   message_id: string;
@@ -83,7 +25,7 @@ const sessionStatus = ref('active');
 const streamingMessage = ref('');
 const messagesContainer = ref<HTMLElement>();
 
-let ws: WebSocket | null = null;
+let ws: null | WebSocket = null;
 
 onMounted(() => {
   loadMessages();
@@ -97,11 +39,14 @@ onUnmounted(() => {
 async function loadMessages() {
   loading.value = true;
   try {
-    const response = await fetch(`/api/v1/hasn/app/sessions/${sessionId}/messages`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+    const response = await fetch(
+      `/api/v1/hasn/app/sessions/${sessionId}/messages`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       },
-    });
+    );
 
     const result = await response.json();
     if (result.code === 200) {
@@ -111,7 +56,7 @@ async function loadMessages() {
     } else {
       message.error(result.msg || '加载消息失败');
     }
-  } catch (error) {
+  } catch {
     message.error('加载消息失败');
   } finally {
     loading.value = false;
@@ -124,27 +69,27 @@ function connectWebSocket() {
 
   ws = new WebSocket(wsUrl);
 
-  ws.onopen = () => {
-    console.log('WebSocket connected');
-  };
+  ws.addEventListener('open', () => {
+    console.warn('WebSocket connected');
+  });
 
-  ws.onmessage = (event) => {
+  ws.addEventListener('message', (event) => {
     try {
       const data = JSON.parse(event.data);
       handleWebSocketMessage(data);
     } catch (error) {
       console.error('Failed to parse WebSocket message:', error);
     }
-  };
+  });
 
-  ws.onerror = (error) => {
+  ws.addEventListener('error', (error) => {
     console.error('WebSocket error:', error);
     message.error('WebSocket 连接错误');
-  };
+  });
 
-  ws.onclose = () => {
-    console.log('WebSocket disconnected');
-  };
+  ws.addEventListener('close', () => {
+    console.warn('WebSocket disconnected');
+  });
 }
 
 function disconnectWebSocket() {
@@ -162,7 +107,22 @@ function handleWebSocketMessage(data: Record<string, unknown>) {
   }
 
   switch (eventType) {
-    case 'session_message_received':
+    case 'session_event': {
+      console.warn('Session event:', data);
+      break;
+    }
+
+    case 'session_message_chunk': {
+      if (data.chunk_index === 0) {
+        streamingMessage.value = data.chunk_text as string;
+      } else {
+        streamingMessage.value += data.chunk_text as string;
+      }
+      nextTick(() => scrollToBottom());
+      break;
+    }
+
+    case 'session_message_received': {
       messages.value.push({
         message_id: data.message_id as string,
         role: data.role as string,
@@ -172,26 +132,15 @@ function handleWebSocketMessage(data: Record<string, unknown>) {
       streamingMessage.value = '';
       nextTick(() => scrollToBottom());
       break;
+    }
 
-    case 'session_message_chunk':
-      if (data.chunk_index === 0) {
-        streamingMessage.value = data.chunk_text as string;
-      } else {
-        streamingMessage.value += data.chunk_text as string;
-      }
-      nextTick(() => scrollToBottom());
-      break;
-
-    case 'session_status_changed':
+    case 'session_status_changed': {
       sessionStatus.value = data.status as string;
       if (data.message) {
         message.info(data.message as string);
       }
       break;
-
-    case 'session_event':
-      console.log('Session event:', data);
-      break;
+    }
   }
 }
 
@@ -205,16 +154,19 @@ async function sendMessage() {
   inputMessage.value = '';
 
   try {
-    const response = await fetch(`/api/v1/hasn/app/sessions/${sessionId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+    const response = await fetch(
+      `/api/v1/hasn/app/sessions/${sessionId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          content_text: messageText,
+        }),
       },
-      body: JSON.stringify({
-        content_text: messageText,
-      }),
-    });
+    );
 
     const result = await response.json();
     if (result.code === 200) {
@@ -230,7 +182,7 @@ async function sendMessage() {
       message.error(result.msg || '发送消息失败');
       inputMessage.value = messageText;
     }
-  } catch (error) {
+  } catch {
     message.error('发送消息失败');
     inputMessage.value = messageText;
   } finally {
@@ -287,6 +239,65 @@ function formatTime(timestamp: string): string {
 }
 </script>
 
+<template>
+  <div class="agent-chat">
+    <div class="chat-header">
+      <a-button type="text" @click="goBack">
+        <template #icon>
+          <ArrowLeftOutlined />
+        </template>
+      </a-button>
+      <div class="header-info">
+        <h3>{{ sessionTitle }}</h3>
+        <a-tag :color="getStatusColor(sessionStatus)">
+          {{ getStatusLabel(sessionStatus) }}
+        </a-tag>
+      </div>
+    </div>
+
+    <div ref="messagesContainer" class="messages-container">
+      <div v-for="msg in messages" :key="msg.message_id" class="message-item">
+        <div class="message-bubble" :class="[msg.role]">
+          <div class="message-role">{{ getRoleLabel(msg.role) }}</div>
+          <div class="message-content">{{ msg.content_text }}</div>
+          <div class="message-time">{{ formatTime(msg.created_at) }}</div>
+        </div>
+      </div>
+
+      <div v-if="streamingMessage" class="message-item">
+        <div class="message-bubble assistant streaming">
+          <div class="message-role">Agent</div>
+          <div class="message-content">{{ streamingMessage }}</div>
+          <div class="message-time">正在输入...</div>
+        </div>
+      </div>
+
+      <div v-if="loading && messages.length === 0" class="loading-placeholder">
+        <a-spin />
+        <span>加载消息中...</span>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <a-textarea
+        v-model:value="inputMessage"
+        :rows="3"
+        placeholder="输入消息..."
+        :disabled="sending || sessionStatus !== 'active'"
+        @keydown.enter.ctrl="sendMessage"
+      />
+      <a-button
+        type="primary"
+        :loading="sending"
+        :disabled="!inputMessage.trim() || sessionStatus !== 'active'"
+        @click="sendMessage"
+      >
+        发送 (Ctrl+Enter)
+      </a-button>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .agent-chat {
   display: flex;
@@ -297,8 +308,8 @@ function formatTime(timestamp: string): string {
 
 .chat-header {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   padding: 16px 24px;
   background-color: #fff;
   border-bottom: 1px solid #e8e8e8;
@@ -306,8 +317,8 @@ function formatTime(timestamp: string): string {
 
 .header-info {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 
 .header-info h3 {
@@ -318,8 +329,8 @@ function formatTime(timestamp: string): string {
 
 .messages-container {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
+  overflow-y: auto;
 }
 
 .message-item {
@@ -329,15 +340,15 @@ function formatTime(timestamp: string): string {
 .message-bubble {
   max-width: 70%;
   padding: 12px 16px;
-  border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
 .message-bubble.user {
   margin-left: auto;
-  background-color: #1890ff;
   color: #fff;
+  background-color: #1890ff;
 }
 
 .message-bubble.assistant {
@@ -349,40 +360,42 @@ function formatTime(timestamp: string): string {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
 }
 
 .message-role {
+  margin-bottom: 4px;
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 4px;
   opacity: 0.8;
 }
 
 .message-content {
   font-size: 14px;
   line-height: 1.6;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
-  word-break: break-word;
 }
 
 .message-time {
-  font-size: 11px;
   margin-top: 4px;
+  font-size: 11px;
   opacity: 0.6;
 }
 
 .loading-placeholder {
   display: flex;
   flex-direction: column;
+  gap: 12px;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   padding: 48px;
   color: #999;
 }

@@ -1,104 +1,10 @@
-<template>
-  <div class="task-management">
-    <div class="task-header">
-      <h2>任务管理</h2>
-      <a-button type="primary" @click="showCreateModal">
-        <template #icon>
-          <PlusOutlined />
-        </template>
-        创建任务
-      </a-button>
-    </div>
-
-    <a-table
-      :columns="columns"
-      :data-source="tasks"
-      :loading="loading"
-      :pagination="pagination"
-      row-key="task_id"
-      @change="handleTableChange"
-    >
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'enabled'">
-          <a-tag :color="record.enabled ? 'green' : 'red'">
-            {{ record.enabled ? '启用' : '禁用' }}
-          </a-tag>
-        </template>
-        <template v-else-if="column.key === 'schedule_type'">
-          <a-tag>{{ getScheduleTypeLabel(record.schedule_type) }}</a-tag>
-        </template>
-        <template v-else-if="column.key === 'actions'">
-          <a-space>
-            <a-button size="small" @click="viewTask(record)">查看</a-button>
-            <a-button size="small" @click="editTask(record)">编辑</a-button>
-            <a-button
-              size="small"
-              :type="record.enabled ? 'default' : 'primary'"
-              @click="toggleTask(record)"
-            >
-              {{ record.enabled ? '禁用' : '启用' }}
-            </a-button>
-            <a-popconfirm
-              title="确定删除此任务吗？"
-              @confirm="deleteTask(record.task_id)"
-            >
-              <a-button size="small" danger>删除</a-button>
-            </a-popconfirm>
-          </a-space>
-        </template>
-      </template>
-    </a-table>
-
-    <a-modal
-      v-model:open="createModalVisible"
-      title="创建任务"
-      width="600px"
-      @ok="handleCreateTask"
-    >
-      <a-form :model="taskForm" layout="vertical">
-        <a-form-item label="任务名称" required>
-          <a-input v-model:value="taskForm.name" placeholder="请输入任务名称" />
-        </a-form-item>
-        <a-form-item label="Agent ID" required>
-          <a-input v-model:value="taskForm.agent_id" placeholder="请输入 Agent ID" />
-        </a-form-item>
-        <a-form-item label="提示词" required>
-          <a-textarea
-            v-model:value="taskForm.prompt"
-            :rows="4"
-            placeholder="请输入任务提示词"
-          />
-        </a-form-item>
-        <a-form-item label="调度类型" required>
-          <a-select v-model:value="taskForm.schedule_type">
-            <a-select-option value="once">单次执行</a-select-option>
-            <a-select-option value="interval">定时执行</a-select-option>
-            <a-select-option value="cron">Cron 表达式</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item v-if="taskForm.schedule_type === 'interval'" label="执行间隔（秒）">
-          <a-input-number
-            v-model:value="taskForm.interval_seconds"
-            :min="60"
-            style="width: 100%"
-          />
-        </a-form-item>
-        <a-form-item v-if="taskForm.schedule_type === 'cron'" label="Cron 表达式">
-          <a-input
-            v-model:value="taskForm.cron_expression"
-            placeholder="例如: 0 0 * * *"
-          />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import type { TableProps } from 'antdv-next';
+
+import { onMounted, ref } from 'vue';
+
 import { PlusOutlined } from '@ant-design/icons-vue';
-import type { TableProps } from 'ant-design-vue';
+import { message } from 'antdv-next';
 
 interface Task {
   task_id: number;
@@ -190,14 +96,14 @@ async function loadTasks() {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-      }
+      },
     );
     const result = await response.json();
     if (result.code === 200) {
       tasks.value = result.data.items || [];
       pagination.value.total = result.data.total || 0;
     }
-  } catch (error) {
+  } catch {
     message.error('加载任务列表失败');
   } finally {
     loading.value = false;
@@ -247,7 +153,7 @@ async function handleCreateTask() {
     } else {
       message.error(result.msg || '任务创建失败');
     }
-  } catch (error) {
+  } catch {
     message.error('任务创建失败');
   }
 }
@@ -255,12 +161,15 @@ async function handleCreateTask() {
 async function toggleTask(task: Task) {
   try {
     const endpoint = task.enabled ? 'disable' : 'enable';
-    const response = await fetch(`/api/v1/hasn/app/tasks/${task.task_id}/${endpoint}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+    const response = await fetch(
+      `/api/v1/hasn/app/tasks/${task.task_id}/${endpoint}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       },
-    });
+    );
 
     const result = await response.json();
     if (result.code === 200) {
@@ -269,7 +178,7 @@ async function toggleTask(task: Task) {
     } else {
       message.error(result.msg || '操作失败');
     }
-  } catch (error) {
+  } catch {
     message.error('操作失败');
   }
 }
@@ -290,16 +199,16 @@ async function deleteTask(taskId: number) {
     } else {
       message.error(result.msg || '删除失败');
     }
-  } catch (error) {
+  } catch {
     message.error('删除失败');
   }
 }
 
-function viewTask(task: Task) {
+function viewTask(_task: Task) {
   message.info('查看任务详情功能待实现');
 }
 
-function editTask(task: Task) {
+function editTask(_task: Task) {
   message.info('编辑任务功能待实现');
 }
 
@@ -321,6 +230,111 @@ function handleTableChange(pag: TableProps['pagination']) {
 }
 </script>
 
+<template>
+  <div class="task-management">
+    <div class="task-header">
+      <h2>任务管理</h2>
+      <a-button type="primary" @click="showCreateModal">
+        <template #icon>
+          <PlusOutlined />
+        </template>
+        创建任务
+      </a-button>
+    </div>
+
+    <a-table
+      :columns="columns"
+      :data-source="tasks"
+      :loading="loading"
+      :pagination="pagination"
+      row-key="task_id"
+      @change="handleTableChange"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'enabled'">
+          <a-tag :color="record.enabled ? 'green' : 'red'">
+            {{ record.enabled ? '启用' : '禁用' }}
+          </a-tag>
+        </template>
+        <template v-else-if="column.key === 'schedule_type'">
+          <a-tag>{{ getScheduleTypeLabel(record.schedule_type) }}</a-tag>
+        </template>
+        <template v-else-if="column.key === 'actions'">
+          <a-space>
+            <a-button size="small" @click="viewTask(record)">查看</a-button>
+            <a-button size="small" @click="editTask(record)">编辑</a-button>
+            <a-button
+              size="small"
+              :type="record.enabled ? 'default' : 'primary'"
+              @click="toggleTask(record)"
+            >
+              {{ record.enabled ? '禁用' : '启用' }}
+            </a-button>
+            <a-popconfirm
+              title="确定删除此任务吗？"
+              @confirm="deleteTask(record.task_id)"
+            >
+              <a-button size="small" danger>删除</a-button>
+            </a-popconfirm>
+          </a-space>
+        </template>
+      </template>
+    </a-table>
+
+    <a-modal
+      v-model:open="createModalVisible"
+      title="创建任务"
+      width="600px"
+      @ok="handleCreateTask"
+    >
+      <a-form :model="taskForm" layout="vertical">
+        <a-form-item label="任务名称" required>
+          <a-input v-model:value="taskForm.name" placeholder="请输入任务名称" />
+        </a-form-item>
+        <a-form-item label="Agent ID" required>
+          <a-input
+            v-model:value="taskForm.agent_id"
+            placeholder="请输入 Agent ID"
+          />
+        </a-form-item>
+        <a-form-item label="提示词" required>
+          <a-textarea
+            v-model:value="taskForm.prompt"
+            :rows="4"
+            placeholder="请输入任务提示词"
+          />
+        </a-form-item>
+        <a-form-item label="调度类型" required>
+          <a-select v-model:value="taskForm.schedule_type">
+            <a-select-option value="once">单次执行</a-select-option>
+            <a-select-option value="interval">定时执行</a-select-option>
+            <a-select-option value="cron">Cron 表达式</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item
+          v-if="taskForm.schedule_type === 'interval'"
+          label="执行间隔（秒）"
+        >
+          <a-input-number
+            v-model:value="taskForm.interval_seconds"
+            :min="60"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item
+          v-if="taskForm.schedule_type === 'cron'"
+          label="Cron 表达式"
+        >
+          <a-input
+            v-model:value="taskForm.cron_expression"
+            placeholder="例如: 0 0 * * *"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</template>
+
 <style scoped>
 .task-management {
   padding: 24px;
@@ -328,8 +342,8 @@ function handleTableChange(pag: TableProps['pagination']) {
 
 .task-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 24px;
 }
 
