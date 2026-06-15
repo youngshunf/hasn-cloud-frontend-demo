@@ -5,14 +5,9 @@
 <script setup lang="ts">
 import type { VbenFormProps } from '@vben/common-ui';
 import type { VxeTableGridOptions, OnActionClickParams } from '#/adapter/vxe-table';
-import type {
-  LlmApiKeyResult,
-  LlmApiKeyCreateParams,
-  LlmRateLimitResult,
-  LlmModelConfigResult,
-} from '#/api';
+import type { LlmApiKeyResult, LlmApiKeyCreateParams } from '#/api';
 
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { Page, useVbenModal, VbenButton } from '@vben/common-ui';
 import { MaterialSymbolsAdd } from '@vben/icons';
 import { $t } from '@vben/locales';
@@ -26,26 +21,8 @@ import {
   updateLlmApiKeyApi,
   deleteLlmApiKeyApi,
   getFullApiKeyApi,
-  getLlmRateLimitListApi,
-  getAvailableModelsApi,
 } from '#/api';
 import { querySchema, useColumns, useFormSchema, useEditFormSchema } from './data';
-
-const rateLimitOptions = ref<LlmRateLimitResult[]>([]);
-const modelOptions = ref<LlmModelConfigResult[]>([]);
-
-const fetchOptions = async () => {
-  try {
-    const [rateLimits, models] = await Promise.all([
-      getLlmRateLimitListApi({ enabled: true }),
-      getAvailableModelsApi(),
-    ]);
-    rateLimitOptions.value = rateLimits;
-    modelOptions.value = models;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const formOptions: VbenFormProps = {
   collapsed: true,
@@ -123,7 +100,7 @@ function onActionClick({ code, row }: OnActionClickParams<LlmApiKeyResult>) {
 
 const [EditForm, editFormApi] = useVbenForm({
   showDefaultActions: false,
-  schema: useEditFormSchema(rateLimitOptions, modelOptions),
+  schema: useEditFormSchema(),
 });
 
 const [editModal, editModalApi] = useVbenModal({
@@ -156,7 +133,7 @@ const [editModal, editModalApi] = useVbenModal({
 
 const [AddForm, addFormApi] = useVbenForm({
   showDefaultActions: false,
-  schema: useFormSchema(rateLimitOptions, modelOptions),
+  schema: useFormSchema(),
 });
 
 const [addModal, addModalApi] = useVbenModal({
@@ -194,10 +171,6 @@ const [addModal, addModalApi] = useVbenModal({
       addFormApi.resetForm();
     }
   },
-});
-
-onMounted(() => {
-  fetchOptions();
 });
 </script>
 

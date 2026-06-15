@@ -4,13 +4,7 @@
  */
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeGridProps } from '#/adapter/vxe-table';
-import type {
-  LlmApiKeyResult,
-  LlmRateLimitResult,
-  LlmModelConfigResult,
-} from '#/api';
-
-import type { Ref } from 'vue';
+import type { LlmApiKeyResult } from '#/api';
 
 import { $t } from '@vben/locales';
 
@@ -121,10 +115,7 @@ export function useColumns(
   ];
 }
 
-export function useFormSchema(
-  rateLimitOptions: Ref<LlmRateLimitResult[]>,
-  modelOptions: Ref<LlmModelConfigResult[]>,
-): VbenFormSchema[] {
+export function useFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'UserSelect',
@@ -156,18 +147,6 @@ export function useFormSchema(
       },
     },
     {
-      component: 'Select',
-      fieldName: 'rate_limit_config_id',
-      label: '速率限制配置',
-      componentProps: {
-        allowClear: true,
-        options: rateLimitOptions,
-        fieldNames: { label: 'name', value: 'id' },
-        class: 'w-full',
-        placeholder: '选择速率限制配置',
-      },
-    },
-    {
       component: 'InputNumber',
       fieldName: 'custom_daily_tokens',
       label: '自定义日 Token',
@@ -185,25 +164,10 @@ export function useFormSchema(
       label: '自定义 RPM',
       componentProps: { min: 1, class: 'w-full', placeholder: '留空使用默认' },
     },
-    {
-      component: 'Select',
-      fieldName: 'allowed_models',
-      label: '允许的模型',
-      componentProps: {
-        mode: 'multiple',
-        options: modelOptions,
-        fieldNames: { label: 'model_name', value: 'id' },
-        class: 'w-full',
-        placeholder: '留空表示允许所有模型',
-      },
-    },
   ];
 }
 
-export function useEditFormSchema(
-  rateLimitOptions: Ref<LlmRateLimitResult[]>,
-  modelOptions: Ref<LlmModelConfigResult[]>,
-): VbenFormSchema[] {
+export function useEditFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
@@ -232,17 +196,6 @@ export function useEditFormSchema(
       },
     },
     {
-      component: 'Select',
-      fieldName: 'rate_limit_config_id',
-      label: '速率限制配置',
-      componentProps: {
-        allowClear: true,
-        options: rateLimitOptions,
-        fieldNames: { label: 'name', value: 'id' },
-        class: 'w-full',
-      },
-    },
-    {
       component: 'InputNumber',
       fieldName: 'custom_daily_tokens',
       label: '自定义日 Token',
@@ -259,17 +212,6 @@ export function useEditFormSchema(
       fieldName: 'custom_rpm_limit',
       label: '自定义 RPM',
       componentProps: { min: 1, class: 'w-full' },
-    },
-    {
-      component: 'Select',
-      fieldName: 'allowed_models',
-      label: '允许的模型',
-      componentProps: {
-        mode: 'multiple',
-        options: modelOptions,
-        fieldNames: { label: 'model_name', value: 'id' },
-        class: 'w-full',
-      },
     },
   ];
 }

@@ -64,15 +64,6 @@ const routes: RouteRecordRaw[] = [
           icon: 'carbon:shopping-bag',
         },
       },
-      {
-        name: 'ModelCreditRate',
-        path: '/user_tier/model_credit_rate',
-        component: () => import('#/views/user_tier/model_credit_rate/index.vue'),
-        meta: {
-          title: '模型费率',
-          icon: 'carbon:calculator',
-        },
-      },
     ],
   },
 ];

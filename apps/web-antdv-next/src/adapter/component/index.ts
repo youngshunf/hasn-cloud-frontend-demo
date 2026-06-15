@@ -63,7 +63,7 @@ import { isEmpty } from '@vben/utils';
 
 import { message, Modal, notification } from 'antdv-next';
 
-import { ModelSelect, UserSelect } from '#/components/business';
+import { UserSelect } from '#/components/business';
 
 type AdapterUploadProps = UploadProps & {
   aspectRatio?: string;
@@ -545,7 +545,6 @@ export type ComponentType =
   | 'InputNumber'
   | 'InputPassword'
   | 'Mentions'
-  | 'ModelSelect'
   | 'UserSelect'
   | 'PrimaryButton'
   | 'Radio'
@@ -640,7 +639,6 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(InputNumber, 'input'),
     InputPassword: withDefaultPlaceholder(InputPassword, 'input'),
     Mentions: withDefaultPlaceholder(Mentions, 'input'),
-    ModelSelect,
     UserSelect,
     // 自定义主要按钮
     PrimaryButton: (props, { attrs, slots }) => {
