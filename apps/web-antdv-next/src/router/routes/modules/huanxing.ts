@@ -10,24 +10,8 @@ const routes: RouteRecordRaw[] = [
       order: 0,
     },
     children: [
-      {
-        name: 'HuanxingServer',
-        path: '/huanxing/server',
-        component: () => import('#/views/huanxing/server/index.vue'),
-        meta: {
-          title: '服务器管理',
-          icon: 'mdi:server-outline',
-        },
-      },
-      {
-        name: 'HuanxingUser',
-        path: '/huanxing/user',
-        component: () => import('#/views/huanxing/user/index.vue'),
-        meta: {
-          title: '唤星用户',
-          icon: 'mdi:account-star-outline',
-        },
-      },
+      // HuanxingServer / HuanxingUser 两页随云端 huanxing_server/huanxing_user
+      // 两表（旧 sidecar 服务器/用户登记机制）于 2026-06-16 整体退役而删除。
       {
         name: 'HuanxingDocument',
         path: '/huanxing/document',
