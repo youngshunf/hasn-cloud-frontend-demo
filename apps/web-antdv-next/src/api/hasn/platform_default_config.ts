@@ -14,8 +14,20 @@ export interface PlatformMediaDefaults {
   stt_models: string[];
 }
 
+// 节点级视频引擎（film / VideoClaw 应用）默认：五类模型 failover 列表 + 引擎分发包 manifest 地址
+// 列表为空＝daemon 退回本机 config [film]；manifest_url 空＝引擎包未配置（daemon 据此 honest 拒绝下载）
+export interface PlatformFilmDefaults {
+  llm_models: string[];
+  vlm_models: string[];
+  image_t2i_models: string[];
+  image_it2i_models: string[];
+  video_models: string[];
+  package_manifest_url: string;
+}
+
 export interface PlatformNodeDefaults {
   media: PlatformMediaDefaults;
+  film: PlatformFilmDefaults;
 }
 
 // 平台默认 agent 运行时模型四槽（null/空 表示「跟随默认」，分身显式设值必胜）

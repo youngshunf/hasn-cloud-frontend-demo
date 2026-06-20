@@ -13,7 +13,7 @@ import {
   updatePlatformDefaultConfigApi,
 } from '#/api/hasn/platform_default_config';
 
-import { mediaSchema, runtimeSchema } from './data';
+import { filmSchema, mediaSchema, runtimeSchema } from './data';
 
 defineOptions({
   name: 'HasnPlatformDefaultConfig',
@@ -30,6 +30,13 @@ const [MediaForm, mediaFormApi] = useVbenForm({
   layout: 'vertical',
   wrapperClass: 'grid-cols-1',
   schema: mediaSchema,
+});
+
+const [FilmForm, filmFormApi] = useVbenForm({
+  showDefaultActions: false,
+  layout: 'vertical',
+  wrapperClass: 'grid-cols-1',
+  schema: filmSchema,
 });
 
 const [RuntimeForm, runtimeFormApi] = useVbenForm({
@@ -58,13 +65,27 @@ function normalizeModelList(value: unknown): string[] {
     .filter((item) => item.length > 0);
 }
 
+// URL 单值：去空白；空串保留为空串（后端 package_manifest_url 是 str，非 null）
+function normalizeUrl(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 async function applyConfig(config: PlatformDefaultConfig) {
   const media = config?.node?.media;
+  const film = config?.node?.film;
   const models = config?.agent_runtime?.models;
   await mediaFormApi.setValues({
     image_models: media?.image_models ?? [],
     tts_models: media?.tts_models ?? [],
     stt_models: media?.stt_models ?? [],
+  });
+  await filmFormApi.setValues({
+    llm_models: film?.llm_models ?? [],
+    vlm_models: film?.vlm_models ?? [],
+    image_t2i_models: film?.image_t2i_models ?? [],
+    image_it2i_models: film?.image_it2i_models ?? [],
+    video_models: film?.video_models ?? [],
+    package_manifest_url: film?.package_manifest_url ?? '',
   });
   await runtimeFormApi.setValues({
     main: models?.main ?? '',
@@ -88,15 +109,17 @@ async function load() {
 }
 
 async function onSave() {
-  const [mediaValid, runtimeValid] = await Promise.all([
+  const [mediaValid, filmValid, runtimeValid] = await Promise.all([
     mediaFormApi.validate(),
+    filmFormApi.validate(),
     runtimeFormApi.validate(),
   ]);
-  if (!mediaValid.valid || !runtimeValid.valid) {
+  if (!mediaValid.valid || !filmValid.valid || !runtimeValid.valid) {
     return;
   }
 
   const mediaValues = await mediaFormApi.getValues();
+  const filmValues = await filmFormApi.getValues();
   const runtimeValues = await runtimeFormApi.getValues();
 
   const payload: PlatformDefaultConfig = {
@@ -105,6 +128,16 @@ async function onSave() {
         image_models: normalizeModelList(mediaValues.image_models),
         tts_models: normalizeModelList(mediaValues.tts_models),
         stt_models: normalizeModelList(mediaValues.stt_models),
+      },
+      // film 段必须随每次保存完整回写——页面读出 package_manifest_url 原值再写回，
+      // admin 保存即 round-trip 保留运营脚本下发的引擎包地址，不会被 Pydantic 默认抹空。
+      film: {
+        llm_models: normalizeModelList(filmValues.llm_models),
+        vlm_models: normalizeModelList(filmValues.vlm_models),
+        image_t2i_models: normalizeModelList(filmValues.image_t2i_models),
+        image_it2i_models: normalizeModelList(filmValues.image_it2i_models),
+        video_models: normalizeModelList(filmValues.video_models),
+        package_manifest_url: normalizeUrl(filmValues.package_manifest_url),
       },
     },
     agent_runtime: {
@@ -154,6 +187,15 @@ onMounted(load);
           </span>
         </template>
         <MediaForm />
+      </Card>
+
+      <Card class="mb-4" title="节点视频引擎模型默认（film / VideoClaw）">
+        <template #extra>
+          <span class="text-sm text-gray-400">
+            列表为空＝回落桌面端本机 config [film]，多个按顺序 failover；引擎包地址留空＝未配置
+          </span>
+        </template>
+        <FilmForm />
       </Card>
 
       <Card class="mb-4" title="平台默认 Agent 运行时模型">
