@@ -18,6 +18,9 @@ catalogs:
     '@clack/prompts':
       specifier: ^1.2.0
       version: 1.2.0
+    '@codemirror/lang-json':
+      specifier: ^6.0.2
+      version: 6.0.2
     '@codemirror/lang-python':
       specifier: ^6.2.1
       version: 6.2.1
@@ -1290,6 +1293,9 @@ importers:
 
   packages/effects/common-ui:
     dependencies:
+      '@codemirror/lang-json':
+        specifier: 'catalog:'
+        version: 6.0.2
       '@codemirror/lang-python':
         specifier: 'catalog:'
         version: 6.2.1

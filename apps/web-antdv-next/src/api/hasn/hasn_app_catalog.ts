@@ -29,6 +29,8 @@ export interface HasnAppCatalog {
   trial_days: number;
   sku_ref?: string;
   manifest_present: boolean;
+  /** 应用专属平台级配置（如 film 视频引擎 5 类模型 + 引擎包 manifest）。直接编辑 JSON，权威在 catalog */
+  config_json?: Record<string, any>;
   created_time: string;
   updated_time?: string;
 }
@@ -65,6 +67,8 @@ export interface HasnAppCatalogCreateParams {
   trial_days: number;
   sku_ref?: string;
   manifest_present: boolean;
+  /** 应用专属平台级配置（直接编辑 JSON，部分更新）。 */
+  config_json?: Record<string, any>;
 }
 
 export interface HasnAppCatalogListResult {
@@ -73,22 +77,39 @@ export interface HasnAppCatalogListResult {
 }
 
 // API functions
-export async function getHasnAppCatalogListApi(params: HasnAppCatalogParams): Promise<HasnAppCatalogListResult> {
-  return requestClient.get<HasnAppCatalogListResult>('/api/v1/hasn/app-catalogs', { params });
+export async function getHasnAppCatalogListApi(
+  params: HasnAppCatalogParams,
+): Promise<HasnAppCatalogListResult> {
+  return requestClient.get<HasnAppCatalogListResult>(
+    '/api/v1/hasn/app-catalogs',
+    { params },
+  );
 }
 
-export async function getHasnAppCatalogApi(id: number): Promise<HasnAppCatalog> {
+export async function getHasnAppCatalogApi(
+  id: number,
+): Promise<HasnAppCatalog> {
   return requestClient.get<HasnAppCatalog>(`/api/v1/hasn/app-catalogs/${id}`);
 }
 
-export async function createHasnAppCatalogApi(data: any): Promise<HasnAppCatalog> {
+export async function createHasnAppCatalogApi(
+  data: any,
+): Promise<HasnAppCatalog> {
   return requestClient.post<HasnAppCatalog>('/api/v1/hasn/app-catalogs', data);
 }
 
-export async function updateHasnAppCatalogApi(id: number, data: Partial<HasnAppCatalogCreateParams>): Promise<HasnAppCatalog> {
-  return requestClient.put<HasnAppCatalog>(`/api/v1/hasn/app-catalogs/${id}`, data);
+export async function updateHasnAppCatalogApi(
+  id: number,
+  data: Partial<HasnAppCatalogCreateParams>,
+): Promise<HasnAppCatalog> {
+  return requestClient.put<HasnAppCatalog>(
+    `/api/v1/hasn/app-catalogs/${id}`,
+    data,
+  );
 }
 
 export async function deleteHasnAppCatalogApi(id: number): Promise<void> {
-  return requestClient.delete<void>('/api/v1/hasn/app-catalogs', { data: { pks: [id] } });
+  return requestClient.delete('/api/v1/hasn/app-catalogs', {
+    data: { pks: [id] },
+  });
 }

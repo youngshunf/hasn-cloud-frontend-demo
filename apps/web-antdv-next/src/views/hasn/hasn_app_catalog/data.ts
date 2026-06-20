@@ -1,8 +1,5 @@
 import type { VbenFormSchema } from '#/adapter/form';
-import type {
-  OnActionClickFn,
-  VxeGridProps,
-} from '#/adapter/vxe-table';
+import type { OnActionClickFn, VxeGridProps } from '#/adapter/vxe-table';
 import type { HasnAppCatalog } from '#/api/hasn/hasn_app_catalog';
 
 import { $t } from '@vben/locales';
@@ -89,13 +86,16 @@ export const querySchema: VbenFormSchema[] = [
     component: 'Input',
     fieldName: 'app_id',
     label: '应用唯一标识',
-    componentProps: {"placeholder": "Search by \u5e94\u7528\u552f\u4e00\u6807\u8bc6\uff08\u4e0e manifest.app_id / WorkbenchApp.id \u4e00\u81f4\uff09"},
+    componentProps: {
+      placeholder:
+        'Search by \u5E94\u7528\u552F\u4E00\u6807\u8BC6\uFF08\u4E0E manifest.app_id / WorkbenchApp.id \u4E00\u81F4\uFF09',
+    },
   },
   {
     component: 'Input',
     fieldName: 'name',
     label: '显示名称',
-    componentProps: {"placeholder": "Search by \u663e\u793a\u540d\u79f0"},
+    componentProps: { placeholder: 'Search by \u663E\u793A\u540D\u79F0' },
   },
   {
     component: 'Select',
@@ -266,7 +266,7 @@ export function useColumns(
           onClick: onActionClick,
         },
         name: 'CellOperation',
-        options: ['edit', 'delete'],
+        options: ['edit', { code: 'config', text: '编辑配置' }, 'delete'],
       },
     },
   ];

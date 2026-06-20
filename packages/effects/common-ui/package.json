@@ -28,6 +28,7 @@
     }
   },
   "dependencies": {
+    "@codemirror/lang-json": "catalog:",
     "@codemirror/lang-python": "catalog:",
     "@codemirror/lang-sql": "catalog:",
     "@codemirror/theme-one-dark": "catalog:",

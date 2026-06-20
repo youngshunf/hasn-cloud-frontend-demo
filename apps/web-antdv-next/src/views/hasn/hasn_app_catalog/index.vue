@@ -12,7 +12,7 @@ import type {
 
 import { ref } from 'vue';
 
-import { Page, useVbenModal, VbenButton } from '@vben/common-ui';
+import { CodeMirror, Page, useVbenModal, VbenButton } from '@vben/common-ui';
 import { MaterialSymbolsAdd } from '@vben/icons';
 import { $t } from '@vben/locales';
 
@@ -92,6 +92,10 @@ function onRefresh() {
 
 function onActionClick({ code, row }: OnActionClickParams<HasnAppCatalog>) {
   switch (code) {
+    case 'config': {
+      configModalApi.setData(row).open();
+      break;
+    }
     case 'delete': {
       deleteHasnAppCatalogApi(row.id).then(() => {
         message.success($t('ui.actionMessage.deleteSuccess', [row.id]));
@@ -178,6 +182,51 @@ const [addModal, addModalApi] = useVbenModal({
     }
   },
 });
+
+/**
+ * Config Modal —— 直接编辑应用专属配置 JSON（不走表单，保存前校验 JSON 格式）
+ */
+const configId = ref<number>(0);
+const configAppName = ref<string>('');
+const configText = ref<string>('{}');
+
+const [ConfigModal, configModalApi] = useVbenModal({
+  destroyOnClose: true,
+  async onConfirm() {
+    let parsed: Record<string, any>;
+    try {
+      parsed = JSON.parse(configText.value);
+    } catch {
+      message.error('JSON 格式不正确，请检查后再保存');
+      return;
+    }
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      message.error('配置必须是一个 JSON 对象（{ ... }）');
+      return;
+    }
+    configModalApi.lock();
+    try {
+      await updateHasnAppCatalogApi(configId.value, { config_json: parsed });
+      message.success($t('ui.actionMessage.operationSuccess'));
+      await configModalApi.close();
+      onRefresh();
+    } finally {
+      configModalApi.unlock();
+    }
+  },
+  onOpenChange(isOpen: boolean) {
+    if (isOpen) {
+      const data = configModalApi.getData<HasnAppCatalog>();
+      configId.value = data?.id ?? 0;
+      configAppName.value = data?.name ?? '';
+      configText.value = JSON.stringify(data?.config_json ?? {}, null, 2);
+    }
+  },
+});
 </script>
 
 <template>
@@ -196,5 +245,18 @@ const [addModal, addModalApi] = useVbenModal({
     <addModal title="添加" :fullscreen-button="false" class="w-[800px]">
       <AddForm />
     </addModal>
+    <ConfigModal
+      :title="`编辑配置${configAppName ? ` - ${configAppName}` : ''}`"
+      :fullscreen-button="false"
+      class="w-[800px]"
+    >
+      <div class="text-muted-foreground mb-2 text-sm">
+        直接编辑该应用的平台级配置 JSON（如 film 视频引擎的 5 类模型与引擎包
+        manifest）。保存前会校验 JSON 格式。
+      </div>
+      <div class="max-h-[60vh] overflow-auto rounded-md border">
+        <CodeMirror v-model="configText" language="json" />
+      </div>
+    </ConfigModal>
   </Page>
 </template>

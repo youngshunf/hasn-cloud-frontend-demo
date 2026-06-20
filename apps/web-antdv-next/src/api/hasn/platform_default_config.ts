@@ -14,20 +14,8 @@ export interface PlatformMediaDefaults {
   stt_models: string[];
 }
 
-// 节点级视频引擎（film / VideoClaw 应用）默认：五类模型 failover 列表 + 引擎分发包 manifest 地址
-// 列表为空＝daemon 退回本机 config [film]；manifest_url 空＝引擎包未配置（daemon 据此 honest 拒绝下载）
-export interface PlatformFilmDefaults {
-  llm_models: string[];
-  vlm_models: string[];
-  image_t2i_models: string[];
-  image_it2i_models: string[];
-  video_models: string[];
-  package_manifest_url: string;
-}
-
 export interface PlatformNodeDefaults {
   media: PlatformMediaDefaults;
-  film: PlatformFilmDefaults;
 }
 
 // 平台默认 agent 运行时模型四槽（null/空 表示「跟随默认」，分身显式设值必胜）
@@ -46,6 +34,9 @@ export interface PlatformAgentRuntimeDefaults {
 export interface PlatformDefaultConfig {
   node: PlatformNodeDefaults;
   agent_runtime: PlatformAgentRuntimeDefaults;
+  // 只读下发聚合：各 AI-Native 应用自治的 hasn_app_catalog.config_json（如 film 的 5 类模型 + 引擎包
+  // manifest 内联）。权威在 catalog，管理端编辑 catalog 页面；GET 响应携带，PUT 写回会被云端丢弃。
+  app_configs?: Record<string, Record<string, any>>;
 }
 
 // GET 响应（config + 审计元数据）

@@ -1,3 +1,4 @@
+import { json } from '@codemirror/lang-json';
 import { python } from '@codemirror/lang-python';
 import { sql } from '@codemirror/lang-sql';
 
@@ -8,6 +9,7 @@ import { sql } from '@codemirror/lang-sql';
 export const languageSupportMap = {
   sql: sql(),
   python: python(),
+  json: json(),
 };
 
 export type LanguageSupport = keyof typeof languageSupportMap;
