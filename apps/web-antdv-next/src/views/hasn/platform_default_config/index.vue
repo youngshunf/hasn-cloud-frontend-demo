@@ -180,34 +180,38 @@ onMounted(load);
         description="保存后服务端重算 revision，桌面端在下一次登录/同步（或后台 reconcile）时拉取并应用：媒体模型立即对下次调用生效；Agent 运行时模型经现有 provision 链路重写 config.yaml。媒体模型名必须是 new-api 已开渠道的模型，否则 failover 会全部失败。"
       />
 
-      <Card class="mb-4" title="节点媒体模型默认（image / tts / stt）">
-        <template #extra>
-          <span class="text-sm text-gray-400">
-            列表为空表示不覆盖，回落桌面端本地配置；多个模型按顺序 failover
-          </span>
-        </template>
-        <MediaForm />
-      </Card>
+      <!-- 卡片网格：宽屏一行两个、窄屏单列自适应；grid gap 同时提供横向/纵向间距（比 mb-4
+           可靠，不被 Card 样式覆盖）；items-start 让各卡片按自身高度顶部对齐，不强行拉等高 -->
+      <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
+        <Card title="节点媒体模型默认（image / tts / stt）">
+          <template #extra>
+            <span class="text-sm text-gray-400">
+              列表为空＝不覆盖、回落本地；多个按顺序 failover
+            </span>
+          </template>
+          <MediaForm />
+        </Card>
 
-      <Card class="mb-4" title="节点视频引擎模型默认（film / VideoClaw）">
-        <template #extra>
-          <span class="text-sm text-gray-400">
-            列表为空＝回落桌面端本机 config [film]，多个按顺序 failover；引擎包地址留空＝未配置
-          </span>
-        </template>
-        <FilmForm />
-      </Card>
+        <Card title="节点视频引擎模型默认（film / VideoClaw）">
+          <template #extra>
+            <span class="text-sm text-gray-400">
+              列表为空＝回落本机 config [film]；引擎包地址空＝未配置
+            </span>
+          </template>
+          <FilmForm />
+        </Card>
 
-      <Card class="mb-4" title="平台默认 Agent 运行时模型">
-        <template #extra>
-          <span class="text-sm text-gray-400">
-            留空表示「跟随默认」；分身在详情页显式设置的模型始终优先
-          </span>
-        </template>
-        <RuntimeForm />
-      </Card>
+        <Card title="平台默认 Agent 运行时模型">
+          <template #extra>
+            <span class="text-sm text-gray-400">
+              留空＝跟随默认；分身详情页显式设置始终优先
+            </span>
+          </template>
+          <RuntimeForm />
+        </Card>
+      </div>
 
-      <div class="flex items-center gap-4">
+      <div class="mt-4 flex items-center gap-4">
         <Button type="primary" :loading="saving" @click="onSave">
           保存并下发
         </Button>
