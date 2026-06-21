@@ -7,11 +7,12 @@ import { requestClient } from '#/api/request';
  * 单行权威表 hasn_platform_default_config，Admin 覆盖式 PUT，server 重算 revision。
  */
 
-// 节点级媒体模型默认（image/tts/stt，列表为空表示不覆盖、回落 daemon 本地配置）
+// 节点级媒体模型默认（image/tts/stt/video，列表为空表示不覆盖、回落 daemon 本地配置）
 export interface PlatformMediaDefaults {
   image_models: string[];
   tts_models: string[];
   stt_models: string[];
+  video_models: string[];
 }
 
 export interface PlatformNodeDefaults {

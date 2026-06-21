@@ -43,6 +43,18 @@ export const mediaSchema: VbenFormSchema[] = [
       open: false,
     },
   },
+  {
+    component: 'Select',
+    fieldName: 'video_models',
+    label: '视频生成模型（failover 顺序）',
+    componentProps: {
+      mode: 'tags',
+      placeholder: '输入模型名后回车，如 wan2.5-i2v（须 new-api 已开渠道）',
+      style: 'width: 100%',
+      tokenSeparators: [',', ' '],
+      open: false,
+    },
+  },
 ];
 
 export const runtimeSchema: VbenFormSchema[] = [

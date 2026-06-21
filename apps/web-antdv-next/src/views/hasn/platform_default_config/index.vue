@@ -65,6 +65,7 @@ async function applyConfig(config: PlatformDefaultConfig) {
     image_models: media?.image_models ?? [],
     tts_models: media?.tts_models ?? [],
     stt_models: media?.stt_models ?? [],
+    video_models: media?.video_models ?? [],
   });
   await runtimeFormApi.setValues({
     main: models?.main ?? '',
@@ -105,6 +106,7 @@ async function onSave() {
         image_models: normalizeModelList(mediaValues.image_models),
         tts_models: normalizeModelList(mediaValues.tts_models),
         stt_models: normalizeModelList(mediaValues.stt_models),
+        video_models: normalizeModelList(mediaValues.video_models),
       },
     },
     agent_runtime: {
@@ -150,7 +152,7 @@ onMounted(load);
       <!-- 卡片网格：宽屏一行两个、窄屏单列自适应；grid gap 同时提供横向/纵向间距（比 mb-4
            可靠，不被 Card 样式覆盖）；items-start 让各卡片按自身高度顶部对齐，不强行拉等高 -->
       <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
-        <Card title="节点媒体模型默认（image / tts / stt）">
+        <Card title="节点媒体模型默认（image / tts / stt / video）">
           <template #extra>
             <span class="text-sm text-gray-400">
               列表为空＝不覆盖、回落本地；多个按顺序 failover
