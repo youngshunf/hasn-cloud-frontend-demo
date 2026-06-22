@@ -365,7 +365,7 @@ export const formSchema: VbenFormSchema[] = [
     fieldName: 'entry_route',
     label: '客户端原生路由',
     rules: 'required',
-    help: '客户端内打开应用的路由，例如 /tasks',
+    help: '客户端内打开应用的路由，统一在 /apps/ 下，例如 /apps/tasks',
   },
   {
     component: 'InputNumber',
