@@ -13,7 +13,7 @@ import {
   updatePlatformDefaultConfigApi,
 } from '#/api/hasn/platform_default_config';
 
-import { mediaSchema, runtimeSchema } from './data';
+import { fallbackPoolSchema, mediaSchema, runtimeSchema } from './data';
 
 defineOptions({
   name: 'HasnPlatformDefaultConfig',
@@ -37,6 +37,14 @@ const [RuntimeForm, runtimeFormApi] = useVbenForm({
   layout: 'vertical',
   wrapperClass: 'grid-cols-1 md:grid-cols-2',
   schema: runtimeSchema,
+});
+
+// 主模型 failover 全局兜底池（单列全宽 tags）：与四槽分开渲染，挂 agent_runtime.model_fallback_pool。
+const [FallbackForm, fallbackFormApi] = useVbenForm({
+  showDefaultActions: false,
+  layout: 'vertical',
+  wrapperClass: 'grid-cols-1',
+  schema: fallbackPoolSchema,
 });
 
 // 单模型槽：去空白，空串 → null（表示「跟随默认」）
@@ -73,6 +81,9 @@ async function applyConfig(config: PlatformDefaultConfig) {
     vision: models?.vision ?? '',
     delegation: models?.delegation ?? '',
   });
+  await fallbackFormApi.setValues({
+    model_fallback_pool: config?.agent_runtime?.model_fallback_pool ?? [],
+  });
 }
 
 async function load() {
@@ -89,16 +100,18 @@ async function load() {
 }
 
 async function onSave() {
-  const [mediaValid, runtimeValid] = await Promise.all([
+  const [mediaValid, runtimeValid, fallbackValid] = await Promise.all([
     mediaFormApi.validate(),
     runtimeFormApi.validate(),
+    fallbackFormApi.validate(),
   ]);
-  if (!mediaValid.valid || !runtimeValid.valid) {
+  if (!mediaValid.valid || !runtimeValid.valid || !fallbackValid.valid) {
     return;
   }
 
   const mediaValues = await mediaFormApi.getValues();
   const runtimeValues = await runtimeFormApi.getValues();
+  const fallbackValues = await fallbackFormApi.getValues();
 
   const payload: PlatformDefaultConfig = {
     node: {
@@ -116,6 +129,9 @@ async function onSave() {
         vision: normalizeModelSlot(runtimeValues.vision),
         delegation: normalizeModelSlot(runtimeValues.delegation),
       },
+      model_fallback_pool: normalizeModelList(
+        fallbackValues.model_fallback_pool,
+      ),
     },
   };
 
@@ -168,6 +184,14 @@ onMounted(load);
             </span>
           </template>
           <RuntimeForm />
+          <div class="mt-2 border-t border-gray-100 pt-4 dark:border-gray-700">
+            <FallbackForm />
+            <p class="mt-1 text-sm text-gray-400">
+              主人只配主模型，平台维护此兜底池；分身主模型上游连续失败时，daemon
+              按池中顺序（剔除主模型自身）切下一个，同一 new-api
+              网关只换模型名。留空＝无兜底（单模型）。
+            </p>
+          </div>
         </Card>
       </div>
 

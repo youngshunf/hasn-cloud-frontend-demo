@@ -29,6 +29,9 @@ export interface PlatformAgentRuntimeModels {
 
 export interface PlatformAgentRuntimeDefaults {
   models: PlatformAgentRuntimeModels;
+  // 主模型 failover 全局兜底池（有序模型名，同一 new-api 网关只换模型名）。空=无兜底（单模型，行为不回归）。
+  // daemon 据此为每个分身的已解析主模型生成兜底链下发 runtime（剔除主模型自身、去重、保序）。
+  model_fallback_pool: string[];
 }
 
 // PUT 请求体形状（与云端 PlatformDefaultConfig 对齐）

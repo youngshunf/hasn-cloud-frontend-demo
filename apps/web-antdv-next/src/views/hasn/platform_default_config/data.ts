@@ -57,6 +57,24 @@ export const mediaSchema: VbenFormSchema[] = [
   },
 ];
 
+// 主模型 failover 全局兜底池（与四槽 models 同级，挂 agent_runtime.model_fallback_pool）。
+// 主人只配主模型，平台维护此池；daemon 据此为每个分身的已解析主模型生成兜底链下发 runtime。
+export const fallbackPoolSchema: VbenFormSchema[] = [
+  {
+    component: 'Select',
+    fieldName: 'model_fallback_pool',
+    label: '主模型 failover 全局兜底池（有序）',
+    componentProps: {
+      mode: 'tags',
+      placeholder:
+        '输入备选模型名后回车，如 gpt-4o、claude-sonnet-4-6（须 new-api 同网关已开渠道）',
+      style: 'width: 100%',
+      tokenSeparators: [',', ' '],
+      open: false,
+    },
+  },
+];
+
 export const runtimeSchema: VbenFormSchema[] = [
   {
     component: 'Input',
