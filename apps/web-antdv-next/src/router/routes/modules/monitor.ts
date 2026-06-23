@@ -39,6 +39,15 @@ const routes: RouteRecordRaw[] = [
           icon: 'mdi:server-outline',
         },
       },
+      {
+        name: 'MonitorServices',
+        path: '/monitor/services',
+        component: () => import('#/views/monitor/services/index.vue'),
+        meta: {
+          title: $t('page.menu.internalServices'),
+          icon: 'mdi:server-network-outline',
+        },
+      },
     ],
   },
 ];

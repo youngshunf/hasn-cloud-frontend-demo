@@ -30,6 +30,7 @@
     "online": "Online",
     "redis": "Redis",
     "server": "Server",
+    "internalServices": "Internal Services",
     "sysDataPermission": "Data Permission",
     "sysDataScope": "Data Scope",
     "sysDataRule": "Data Rule",

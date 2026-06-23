@@ -30,6 +30,7 @@
     "online": "在线用户",
     "redis": "Redis",
     "server": "服务器",
+    "internalServices": "内部服务",
     "sysDataPermission": "数据权限",
     "sysDataScope": "数据范围",
     "sysDataRule": "数据规则",

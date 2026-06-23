@@ -27,6 +27,17 @@ export interface OnlineMonitorResult {
   expires_time: number;
 }
 
+export interface ServiceHealthResult {
+  name: string;
+  title: string;
+  status: string; // up | down | unconfigured
+  configured: boolean;
+  base_url: string;
+  latency_ms: null | number;
+  version: null | string;
+  detail: string;
+}
+
 export interface MonitorOnlineParams {
   username: string;
 }
@@ -41,6 +52,10 @@ export async function getServerMonitorApi() {
 
 export async function getRedisMonitorApi() {
   return requestClient.get<RedisMonitorResult>('/api/v1/monitors/redis');
+}
+
+export async function getServicesHealthApi() {
+  return requestClient.get<ServiceHealthResult[]>('/api/v1/monitors/services');
 }
 
 export async function getOnlineMonitorApi(params: MonitorOnlineParams) {
