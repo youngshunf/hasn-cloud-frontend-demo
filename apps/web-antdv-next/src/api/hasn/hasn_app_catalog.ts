@@ -108,6 +108,20 @@ export async function updateHasnAppCatalogApi(
   );
 }
 
+/**
+ * 仅更新应用专属平台级配置 JSON（管理端「编辑配置」专用）。
+ * 后端走独立 partial 端点 PUT /{id}/config，只校验 config_json，
+ * 不要求回填整行字段——否则会撞全字段必填校验报「app_id 字段为必填项」。
+ */
+export async function updateHasnAppCatalogConfigApi(
+  id: number,
+  config_json: Record<string, any>,
+): Promise<void> {
+  return requestClient.put(`/api/v1/hasn/app-catalogs/${id}/config`, {
+    config_json,
+  });
+}
+
 export async function deleteHasnAppCatalogApi(id: number): Promise<void> {
   return requestClient.delete('/api/v1/hasn/app-catalogs', {
     data: { pks: [id] },

@@ -25,6 +25,7 @@ import {
   deleteHasnAppCatalogApi,
   getHasnAppCatalogListApi,
   updateHasnAppCatalogApi,
+  updateHasnAppCatalogConfigApi,
 } from '#/api/hasn/hasn_app_catalog';
 
 import {
@@ -210,7 +211,7 @@ const [ConfigModal, configModalApi] = useVbenModal({
     }
     configModalApi.lock();
     try {
-      await updateHasnAppCatalogApi(configId.value, { config_json: parsed });
+      await updateHasnAppCatalogConfigApi(configId.value, parsed);
       message.success($t('ui.actionMessage.operationSuccess'));
       await configModalApi.close();
       onRefresh();
