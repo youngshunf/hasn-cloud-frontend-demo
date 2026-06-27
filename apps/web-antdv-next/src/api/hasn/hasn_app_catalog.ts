@@ -29,6 +29,12 @@ export interface HasnAppCatalog {
   trial_days: number;
   sku_ref?: string;
   manifest_present: boolean;
+  /** 发布阶段（内测）：ga=正式 / beta_full=全量内测 / beta_gray=灰度内测。与 status 上架/下架正交。 */
+  release_phase?: string;
+  /** 自定义角标文案（如 热门/推荐/限免），留空则不展示角标。 */
+  badge_text?: string;
+  /** 角标颜色（hex，如 #6D28D9），留空回落品牌紫。 */
+  badge_color?: string;
   /** 应用专属平台级配置（如 film 视频引擎 5 类模型 + 引擎包 manifest）。直接编辑 JSON，权威在 catalog */
   config_json?: Record<string, any>;
   created_time: string;
@@ -67,6 +73,12 @@ export interface HasnAppCatalogCreateParams {
   trial_days: number;
   sku_ref?: string;
   manifest_present: boolean;
+  /** 发布阶段（内测）：ga / beta_full / beta_gray。 */
+  release_phase?: string;
+  /** 自定义角标文案。 */
+  badge_text?: string;
+  /** 角标颜色（hex）。 */
+  badge_color?: string;
   /** 应用专属平台级配置（直接编辑 JSON，部分更新）。 */
   config_json?: Record<string, any>;
 }

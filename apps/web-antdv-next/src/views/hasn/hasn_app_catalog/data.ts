@@ -41,6 +41,12 @@ const BILLING_CYCLE_OPTIONS = [
   { label: '包月', value: 'month' },
   { label: '包年', value: 'year' },
 ];
+/** 发布阶段（内测）：与上架状态 status 正交。灰度内测仅被邀请/审批通过的用户可见可开。 */
+const RELEASE_PHASE_OPTIONS = [
+  { label: '正式发布 (GA)', value: 'ga' },
+  { label: '全量内测', value: 'beta_full' },
+  { label: '灰度内测', value: 'beta_gray' },
+];
 
 /**
  * 表单默认值兜底：后端这些字段非空，但管理员通常无需逐项填写。
@@ -54,6 +60,7 @@ export const CATALOG_FORM_DEFAULTS = {
   scope: ['personal'],
   collaboration_mode: 'none',
   sort_order: 0,
+  release_phase: 'ga',
   default_mount: false,
   access_type: 'free',
   price_unit: 'cny',
@@ -189,6 +196,20 @@ export function useColumns(
       field: 'sort_order',
       title: '工作台排序',
       width: 150,
+    },
+    {
+      field: 'release_phase',
+      title: '发布阶段',
+      width: 120,
+      cellRender: {
+        name: 'CellTag',
+        options: RELEASE_PHASE_OPTIONS,
+      },
+    },
+    {
+      field: 'badge_text',
+      title: '自定义角标',
+      width: 120,
     },
     {
       field: 'default_mount',
@@ -374,6 +395,27 @@ export const formSchema: VbenFormSchema[] = [
     defaultValue: 0,
     help: '数值小的排在前面',
     componentProps: { style: 'width: 100%' },
+  },
+  {
+    component: 'Select',
+    fieldName: 'release_phase',
+    label: '发布阶段',
+    defaultValue: 'ga',
+    componentProps: { options: RELEASE_PHASE_OPTIONS },
+    help: '与上架状态正交。全量内测=所有人可见并标内测；灰度内测=仅被邀请/审批通过的用户可见可开',
+  },
+  {
+    component: 'Input',
+    fieldName: 'badge_text',
+    label: '自定义角标',
+    help: '如 热门 / 推荐 / 限免，留空则不显示角标',
+  },
+  {
+    component: 'Input',
+    fieldName: 'badge_color',
+    label: '角标颜色',
+    help: '角标背景色（hex，如 #6D28D9），留空回落品牌紫',
+    componentProps: { placeholder: '#6D28D9' },
   },
   {
     component: 'Switch',
