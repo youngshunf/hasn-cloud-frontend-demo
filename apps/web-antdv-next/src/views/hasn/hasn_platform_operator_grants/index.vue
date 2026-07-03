@@ -7,7 +7,7 @@ import type {
 } from '#/adapter/vxe-table';
 import type {
   HasnPlatformOperatorGrants,
-  HasnPlatformOperatorGrantsCreateParams,
+  HasnPlatformOperatorGrantsBatchCreateParams,
   HasnPlatformOperatorGrantsParams,
 } from '#/api/hasn/hasn_platform_operator_grants';
 
@@ -22,13 +22,13 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  createHasnPlatformOperatorGrantsApi,
+  createHasnPlatformOperatorGrantsBatchApi,
   deleteHasnPlatformOperatorGrantsApi,
   getHasnPlatformOperatorGrantsListApi,
   updateHasnPlatformOperatorGrantsApi,
 } from '#/api/hasn/hasn_platform_operator_grants';
 
-import { formSchema, querySchema, useColumns } from './data';
+import { addFormSchema, formSchema, querySchema, useColumns } from './data';
 
 defineOptions({
   name: 'HasnPlatformOperatorGrants',
@@ -152,7 +152,7 @@ const [editModal, editModalApi] = useVbenModal({
  */
 const [AddForm, addFormApi] = useVbenForm({
   showDefaultActions: false,
-  schema: formSchema,
+  schema: addFormSchema,
 });
 
 const [addModal, addModalApi] = useVbenModal({
@@ -161,15 +161,22 @@ const [addModal, addModalApi] = useVbenModal({
     const { valid } = await addFormApi.validate();
     if (valid) {
       addModalApi.lock();
-      const data =
-        await addFormApi.getValues<HasnPlatformOperatorGrantsParams>();
+      const data = await addFormApi.getValues<Record<string, any>>();
       // owner_hasn_id 只是选人辅助字段，不入库；granted_by 由后端从 JWT 覆盖
-      const { owner_hasn_id: _owner, ...payload } = data as Record<string, any>;
+      // scopes 多选 → 后端展开成多行幂等落库（已存在的跳过）
+      const payload: HasnPlatformOperatorGrantsBatchCreateParams = {
+        agent_hasn_id: data.agent_hasn_id,
+        scopes: data.scopes ?? [],
+        note: data.note,
+      };
       try {
-        await createHasnPlatformOperatorGrantsApi(
-          payload as HasnPlatformOperatorGrantsCreateParams,
+        const { created } =
+          await createHasnPlatformOperatorGrantsBatchApi(payload);
+        message.success(
+          created > 0
+            ? `已授予 ${created} 项特权`
+            : '所选特权此前均已授予，无新增',
         );
-        message.success($t('ui.actionMessage.operationSuccess'));
         await addModalApi.close();
         onRefresh();
       } finally {

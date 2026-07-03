@@ -28,6 +28,16 @@ export interface HasnPlatformOperatorGrantsCreateParams {
   note?: string;
 }
 
+/**
+ * 批量授予参数（一次给同一分身勾选多个特权 scope）。
+ * 数据层仍是「一行一 (agent, scope)」，后端把多选展开成多行幂等落库（已存在的跳过）。
+ */
+export interface HasnPlatformOperatorGrantsBatchCreateParams {
+  agent_hasn_id: string;
+  scopes: string[];
+  note?: string;
+}
+
 export interface HasnPlatformOperatorGrantsListResult {
   items: HasnPlatformOperatorGrants[];
   total: number;
@@ -76,6 +86,16 @@ export async function createHasnPlatformOperatorGrantsApi(
   data: HasnPlatformOperatorGrantsCreateParams,
 ): Promise<HasnPlatformOperatorGrants> {
   return requestClient.post<HasnPlatformOperatorGrants>(BASE, data);
+}
+
+/**
+ * 批量授予：给同一分身一次授予多个特权 scope（后端展开成多行幂等落库）。
+ * @returns 后端返回 `{ created }`——本次实际新建的授予行数（已存在的不计）。
+ */
+export async function createHasnPlatformOperatorGrantsBatchApi(
+  data: HasnPlatformOperatorGrantsBatchCreateParams,
+): Promise<{ created: number }> {
+  return requestClient.post<{ created: number }>(`${BASE}/batch`, data);
 }
 
 export async function updateHasnPlatformOperatorGrantsApi(
