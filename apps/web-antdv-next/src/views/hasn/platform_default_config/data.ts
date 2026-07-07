@@ -75,6 +75,21 @@ export const fallbackPoolSchema: VbenFormSchema[] = [
   },
 ];
 
+// 节点级安全默认（三层漏斗裁判开关，挂 security.sensitive_scanner_enabled）。
+// 缺省开；关闭时 daemon 出站闸跳过 L1 正则扫描（L2 云端 LLM 裁判照常）。
+export const securitySchema: VbenFormSchema[] = [
+  {
+    component: 'Switch',
+    fieldName: 'sensitive_scanner_enabled',
+    label: 'L1 敏感信息扫描器（正则层）',
+    defaultValue: true,
+    componentProps: {
+      checkedChildren: '开',
+      unCheckedChildren: '关',
+    },
+  },
+];
+
 export const runtimeSchema: VbenFormSchema[] = [
   {
     component: 'Input',

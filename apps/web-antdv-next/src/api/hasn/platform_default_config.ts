@@ -34,10 +34,18 @@ export interface PlatformAgentRuntimeDefaults {
   model_fallback_pool: string[];
 }
 
+// 节点级安全默认（三层漏斗裁判开关等，doc07）
+export interface PlatformSecurityDefaults {
+  // L1 敏感信息扫描器（hasn-core SensitiveScanner）总开关，缺省 true。
+  // 关闭时 daemon 出站闸跳过正则层（L2 云端 LLM 裁判照常）。
+  sensitive_scanner_enabled: boolean;
+}
+
 // PUT 请求体形状（与云端 PlatformDefaultConfig 对齐）
 export interface PlatformDefaultConfig {
   node: PlatformNodeDefaults;
   agent_runtime: PlatformAgentRuntimeDefaults;
+  security?: PlatformSecurityDefaults;
   // 只读下发聚合：各 AI-Native 应用自治的 hasn_app_catalog.config_json（如 film 的 5 类模型 + 引擎包
   // manifest 内联）。权威在 catalog，管理端编辑 catalog 页面；GET 响应携带，PUT 写回会被云端丢弃。
   app_configs?: Record<string, Record<string, any>>;

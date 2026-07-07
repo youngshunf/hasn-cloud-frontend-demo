@@ -13,7 +13,12 @@ import {
   updatePlatformDefaultConfigApi,
 } from '#/api/hasn/platform_default_config';
 
-import { fallbackPoolSchema, mediaSchema, runtimeSchema } from './data';
+import {
+  fallbackPoolSchema,
+  mediaSchema,
+  runtimeSchema,
+  securitySchema,
+} from './data';
 
 defineOptions({
   name: 'HasnPlatformDefaultConfig',
@@ -45,6 +50,14 @@ const [FallbackForm, fallbackFormApi] = useVbenForm({
   layout: 'vertical',
   wrapperClass: 'grid-cols-1',
   schema: fallbackPoolSchema,
+});
+
+// 节点级安全默认（doc07 三层漏斗裁判开关），挂 security.sensitive_scanner_enabled。
+const [SecurityForm, securityFormApi] = useVbenForm({
+  showDefaultActions: false,
+  layout: 'vertical',
+  wrapperClass: 'grid-cols-1',
+  schema: securitySchema,
 });
 
 // 单模型槽：去空白，空串 → null（表示「跟随默认」）
@@ -84,6 +97,11 @@ async function applyConfig(config: PlatformDefaultConfig) {
   await fallbackFormApi.setValues({
     model_fallback_pool: config?.agent_runtime?.model_fallback_pool ?? [],
   });
+  await securityFormApi.setValues({
+    // 缺省开：存量行无 security 段时回落 true
+    sensitive_scanner_enabled:
+      config?.security?.sensitive_scanner_enabled ?? true,
+  });
 }
 
 async function load() {
@@ -100,18 +118,26 @@ async function load() {
 }
 
 async function onSave() {
-  const [mediaValid, runtimeValid, fallbackValid] = await Promise.all([
-    mediaFormApi.validate(),
-    runtimeFormApi.validate(),
-    fallbackFormApi.validate(),
-  ]);
-  if (!mediaValid.valid || !runtimeValid.valid || !fallbackValid.valid) {
+  const [mediaValid, runtimeValid, fallbackValid, securityValid] =
+    await Promise.all([
+      mediaFormApi.validate(),
+      runtimeFormApi.validate(),
+      fallbackFormApi.validate(),
+      securityFormApi.validate(),
+    ]);
+  if (
+    !mediaValid.valid ||
+    !runtimeValid.valid ||
+    !fallbackValid.valid ||
+    !securityValid.valid
+  ) {
     return;
   }
 
   const mediaValues = await mediaFormApi.getValues();
   const runtimeValues = await runtimeFormApi.getValues();
   const fallbackValues = await fallbackFormApi.getValues();
+  const securityValues = await securityFormApi.getValues();
 
   const payload: PlatformDefaultConfig = {
     node: {
@@ -132,6 +158,11 @@ async function onSave() {
       model_fallback_pool: normalizeModelList(
         fallbackValues.model_fallback_pool,
       ),
+    },
+    security: {
+      // Switch 值统一收敛为布尔，缺省 true
+      sensitive_scanner_enabled:
+        securityValues.sensitive_scanner_enabled !== false,
     },
   };
 
@@ -192,6 +223,18 @@ onMounted(load);
               网关只换模型名。留空＝无兜底（单模型）。
             </p>
           </div>
+        </Card>
+
+        <Card title="内容安全裁判（三层漏斗）">
+          <template #extra>
+            <span class="text-sm text-gray-400">出站披露把关 · 缺省开</span>
+          </template>
+          <SecurityForm />
+          <p class="mt-1 text-sm text-gray-400">
+            开启后 daemon 出站闸在文本进入云端 LLM 裁判前，先用本地正则扫一遍
+            电话/邮箱/银行卡/身份证/凭据；关闭仅停正则层（L1），云端 LLM
+            裁判（L2）与硬权限（L0）照常。缺省开，一般无需关闭。
+          </p>
         </Card>
       </div>
 
