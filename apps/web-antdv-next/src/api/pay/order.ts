@@ -20,6 +20,13 @@ export interface PayOrder {
   expire_time: string;
   success_time: string | null;
   created_time: string;
+  // 统一商业化内核（MK-1）：下单时固化的商品目录引用快照，商业化中心订单页据此串出所属 offering
+  offering_ref?: {
+    key?: string;
+    kind?: string;
+    display_name?: string;
+    plan_key?: string;
+  } | null;
 }
 
 export async function getPayOrderListApi(params?: Record<string, any>) {
