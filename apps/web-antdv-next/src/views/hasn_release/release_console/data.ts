@@ -145,55 +145,5 @@ export const buildFormSchema: VbenFormSchema[] = [
   },
 ];
 
-/** 手动登记发布表单（资产为已预上传七牛的元数据 JSON） */
-export const publishFormSchema: VbenFormSchema[] = [
-  {
-    component: 'Input',
-    fieldName: 'version',
-    label: '版本号',
-    rules: 'required',
-    componentProps: { placeholder: 'semver，如 1.2.0' },
-  },
-  {
-    component: 'Select',
-    fieldName: 'channel',
-    label: '渠道',
-    defaultValue: 'stable',
-    rules: 'required',
-    componentProps: { options: CHANNEL_OPTIONS },
-  },
-  {
-    component: 'Switch',
-    fieldName: 'set_latest',
-    label: '发布后置为最新',
-    defaultValue: true,
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'release_notes_md',
-    label: '更新日志（中）',
-    componentProps: { rows: 4, placeholder: '支持 Markdown' },
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'release_notes_en_md',
-    label: '更新日志（英）',
-    componentProps: { rows: 3, placeholder: 'Markdown, optional' },
-  },
-  {
-    component: 'Textarea',
-    fieldName: 'assets_json',
-    label: '资产清单 JSON',
-    rules: 'required',
-    componentProps: {
-      rows: 10,
-      placeholder:
-        '各平台已预上传七牛后的资产元数据数组。updater 必须带 signature（.sig 内容）。\n' +
-        '示例：\n' +
-        '[\n' +
-        '  {"platform_target":"darwin-aarch64","asset_kind":"installer","download_url":"https://cdn.../Astra_1.2.0_aarch64.dmg","file_name":"Astra_1.2.0_aarch64.dmg","file_size":0,"sha256":""},\n' +
-        '  {"platform_target":"darwin-aarch64","asset_kind":"updater","download_url":"https://cdn.../Astra.app.tar.gz","file_name":"Astra.app.tar.gz","file_size":0,"sha256":"","signature":"dW50cnVzdGVk..."}\n' +
-        ']',
-    },
-  },
-];
+// 手动发布表单已改由 ReleasePublishForm.vue 结构化承载（上传包 + 选平台，
+// 前端自动回填 CDN 直链/sha256/大小），原先手写资产清单 JSON 的 publishFormSchema 已退役。

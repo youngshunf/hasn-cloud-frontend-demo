@@ -103,7 +103,35 @@ export interface GithubBuildRequest {
   channel: string;
 }
 
+/** 上传单个产物后的回执（对齐后端 CiUploadResponse），供发布页回填资产元数据 */
+export interface UploadAssetResult {
+  download_url: string;
+  file_name: string;
+  file_size: number;
+  sha256: string;
+  object_key: string;
+}
+
 // ---------- API ----------
+
+/**
+ * 上传单个平台产物到七牛（release:publish）。
+ *
+ * 后端 `POST /api/v1/release/admin/upload`（multipart：file + version + channel），
+ * 服务端落公共桶 + 现算 sha256，回长效 https CDN 直链。前端据此回填资产的
+ * download_url / file_size / sha256，无需管理员手写 JSON。
+ */
+export async function uploadReleaseAssetApi(
+  file: File,
+  version: string,
+  channel: string,
+): Promise<UploadAssetResult> {
+  return requestClient.upload<UploadAssetResult>(`${BASE}/upload`, {
+    file,
+    version,
+    channel,
+  });
+}
 
 /** 版本列表（channel 空=全部；后端返回扁平数组，非分页） */
 export async function listReleasesApi(params?: {

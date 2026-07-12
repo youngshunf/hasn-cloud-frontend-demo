@@ -29,12 +29,8 @@ import {
   updateReleaseApi,
 } from '#/api/hasn_release/release_console';
 
-import {
-  buildFormSchema,
-  editFormSchema,
-  publishFormSchema,
-  useColumns,
-} from './data';
+import { buildFormSchema, editFormSchema, useColumns } from './data';
+import ReleasePublishForm from './ReleasePublishForm.vue';
 
 defineOptions({ name: 'ReleaseConsole' });
 
@@ -220,56 +216,24 @@ const [BuildModal, buildModalApi] = useVbenModal({
   },
 });
 
-// ---------- 手动登记发布 ----------
-const [PublishForm, publishFormApi] = useVbenForm({
-  showDefaultActions: false,
-  schema: publishFormSchema,
-});
+// ---------- 手动上传发布 ----------
+// 用自定义组件承载「上传包 + 选平台」表单，替代原先手写资产清单 JSON。
+const publishFormRef = ref<InstanceType<typeof ReleasePublishForm>>();
 const [PublishModal, publishModalApi] = useVbenModal({
   destroyOnClose: true,
   async onConfirm() {
-    const { valid } = await publishFormApi.validate();
-    if (!valid) return;
-    const raw = await publishFormApi.getValues<{
-      assets_json?: string;
-      channel: string;
-      release_notes_en_md?: string;
-      release_notes_md?: string;
-      set_latest?: boolean;
-      version: string;
-    }>();
-    // 解析并校验资产清单 JSON（前端拦一道，避免明显错误打到后端）
-    let assets: unknown;
-    try {
-      assets = JSON.parse(raw.assets_json || '[]');
-    } catch {
-      message.error('资产清单 JSON 解析失败，请检查格式');
-      return;
-    }
-    if (!Array.isArray(assets) || assets.length === 0) {
-      message.error('资产清单不能为空');
-      return;
-    }
+    // 组件内自校验并组装请求体；不合法时组件已给出提示并返回 null
+    const payload = await publishFormRef.value?.validateAndBuild();
+    if (!payload) return;
     publishModalApi.lock();
     try {
-      const release = await publishReleaseApi({
-        assets: assets as never,
-        channel: raw.channel,
-        release_notes_en_md: raw.release_notes_en_md || null,
-        release_notes_md: raw.release_notes_md || null,
-        set_latest: raw.set_latest ?? true,
-        source: 'manual',
-        version: raw.version,
-      });
+      const release = await publishReleaseApi(payload);
       message.success(`已发布 ${release.version}`);
       await publishModalApi.close();
       onRefresh();
     } finally {
       publishModalApi.unlock();
     }
-  },
-  onOpenChange(isOpen: boolean) {
-    if (isOpen) publishFormApi.resetForm();
   },
 });
 
@@ -401,18 +365,20 @@ function statusColor(status: string): string {
       <BuildForm />
     </BuildModal>
 
-    <!-- 手动登记发布 -->
+    <!-- 手动上传发布 -->
     <PublishModal
-      title="手动登记发布"
+      title="手动上传发布"
       :fullscreen-button="false"
       class="w-[820px]"
     >
       <div class="text-muted-foreground mb-3 text-sm">
-        用于无 CI 时的手动发布：先将各平台安装包（dmg）与热更新包（app.tar.gz）
-        及其 .sig 上传到七牛 CDN，再在此登记资产元数据。updater 资产必须携带
-        signature（.sig 文件内容）。
+        用于无 CI
+        时的手动发布：填写版本号后，直接上传各平台安装包（dmg/msi/exe）
+        与热更新包（app.tar.gz/nsis.zip）——系统自动上传七牛并回填 CDN
+        直链、大小、 sha256。热更新包需另附 .sig 签名（可上传 .sig
+        文件自动读取）。
       </div>
-      <PublishForm />
+      <ReleasePublishForm ref="publishFormRef" />
     </PublishModal>
 
     <!-- 构建任务列表 -->
