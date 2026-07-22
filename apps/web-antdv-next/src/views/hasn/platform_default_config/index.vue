@@ -199,13 +199,18 @@ onMounted(load);
       <!-- 卡片网格：宽屏一行两个、窄屏单列自适应；grid gap 同时提供横向/纵向间距（比 mb-4
            可靠，不被 Card 样式覆盖）；items-start 让各卡片按自身高度顶部对齐，不强行拉等高 -->
       <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
-        <Card title="节点媒体模型默认（image / tts / stt / video）">
+        <Card title="New API 网关媒体模型（image / tts / stt / video）">
           <template #extra>
             <span class="text-sm text-gray-400">
-              列表为空＝不覆盖、回落本地；多个按顺序 failover
+              列表为空＝回落 daemon 内置网关模型链；多个按顺序 failover
             </span>
           </template>
           <MediaForm />
+          <p class="mt-1 text-sm text-gray-400">
+            本地模型、安装状态与 benchmark 由节点语音 catalog
+            管理；主人在本机选择
+            auto、仅本地或仅网关，并可关闭本地失败后的网关降级。
+          </p>
         </Card>
 
         <Card title="平台默认 Agent 运行时模型">

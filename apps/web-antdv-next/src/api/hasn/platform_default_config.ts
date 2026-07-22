@@ -7,7 +7,8 @@ import { requestClient } from '#/api/request';
  * 单行权威表 hasn_platform_default_config，Admin 覆盖式 PUT，server 重算 revision。
  */
 
-// 节点级媒体模型默认（image/tts/stt/video，列表为空表示不覆盖、回落 daemon 本地配置）
+// New API 网关媒体模型链（image/tts/stt/video）；不承载本地模型与本地路由策略。
+// 列表为空时 daemon 回落到内置网关模型链，不代表强制本地推理。
 export interface PlatformMediaDefaults {
   image_models: string[];
   tts_models: string[];
