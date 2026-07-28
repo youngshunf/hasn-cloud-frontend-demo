@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { VbenFormProps } from '@vben/common-ui';
-import type { OnActionClickParams, VxeTableGridOptions } from '#/adapter/vxe-table';
+
+import type { StorageQuotaUnit } from './storageQuota';
+
+import type {
+  OnActionClickParams,
+  VxeTableGridOptions,
+} from '#/adapter/vxe-table';
 import type { BillingPlan } from '#/api/user_tier/billing_plan';
 
 import { ref } from 'vue';
@@ -14,13 +20,14 @@ import { message } from 'antdv-next';
 import { useVbenForm } from '#/adapter/form';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  getBillingPlanListApi,
   createBillingPlanApi,
-  updateBillingPlanApi,
   deleteBillingPlanApi,
+  getBillingPlanListApi,
+  updateBillingPlanApi,
 } from '#/api/user_tier/billing_plan';
 
-import { querySchema, useColumns, formSchema } from './data';
+import { formSchema, querySchema, useColumns } from './data';
+import { bytesToStorageInput, storageInputToBytes } from './storageQuota';
 
 defineOptions({
   name: 'BillingPlan',
@@ -93,40 +100,74 @@ function onActionClick({ code, row }: OnActionClickParams<BillingPlan>) {
 }
 
 /**
- * 结构化字段 → 提交体：组装 trial_json / grace_json / quota_json，并清理临时字段。
+ * 结构化字段 → 提交体：组装试用、宽限与存储权益，并清理临时字段。
  */
 function assembleJsonFields(data: any): any {
-  const out = { ...data };
-  out.trial_json = {
-    enabled: Boolean(data.trial_enabled),
-    days: data.trial_enabled ? Number(data.trial_days) || 0 : 0,
-    times: data.trial_enabled ? (Number(data.trial_times) ?? 1) : 0,
-  };
-  const remindDays = String(data.grace_remind_days || '')
+  const {
+    grace_days: graceDays,
+    grace_remind_days: graceRemindDays,
+    quota_json: rawQuota,
+    storage_quota_unit: storageQuotaUnit,
+    storage_quota_value: storageQuotaValue,
+    trial_days: trialDays,
+    trial_enabled: trialEnabled,
+    trial_times: trialTimes,
+    ...base
+  } = data;
+  const remindDays = String(graceRemindDays || '')
     .split(',')
     .map((s: string) => Number(s.trim()))
     .filter((n: number) => Number.isFinite(n) && n > 0);
-  out.grace_json = {
-    remind_days: remindDays,
-    grace_days: Number(data.grace_days) || 0,
+  const quota = Object.fromEntries(
+    Object.entries(parseQuota(rawQuota)).filter(
+      ([key]) => key !== 'storage_bytes',
+    ),
+  );
+  if (base.offering_key === 'llm:tier') {
+    quota.storage_bytes = storageInputToBytes(
+      Number(storageQuotaValue),
+      storageQuotaUnit as StorageQuotaUnit,
+    );
+  }
+  return {
+    ...base,
+    grace_json: {
+      grace_days: Number(graceDays) || 0,
+      remind_days: remindDays,
+    },
+    quota_json: quota,
+    trial_json: {
+      days: trialEnabled ? Number(trialDays) || 0 : 0,
+      enabled: Boolean(trialEnabled),
+      times: trialEnabled ? Number(trialTimes) || 1 : 0,
+    },
   };
-  out.quota_json = parseQuota(data.quota_json);
-  delete out.trial_enabled;
-  delete out.trial_days;
-  delete out.trial_times;
-  delete out.grace_remind_days;
-  delete out.grace_days;
-  return out;
 }
 
 /**
- * 权威行 → 表单：拆解 trial_json / grace_json 为结构化字段，quota_json 转字符串。
+ * 权威行 → 表单：拆解结构化字段，其他配额保留为高级 JSON。
  */
 function explodeJsonFields(row: BillingPlan): Record<string, any> {
   const trial = row.trial_json || {};
   const grace = row.grace_json || {};
   const quota = row.quota_json || {};
-  const remind = Array.isArray(grace.remind_days) ? grace.remind_days.join(',') : '';
+  const otherQuota = Object.fromEntries(
+    Object.entries(quota).filter(([key]) => key !== 'storage_bytes'),
+  );
+  let storageQuota: { unit: StorageQuotaUnit; value: null | number } = {
+    unit: 'GiB',
+    value: null,
+  };
+  if (row.offering_key === 'llm:tier') {
+    try {
+      storageQuota = bytesToStorageInput(Number(quota.storage_bytes));
+    } catch {
+      message.error('该档位的 storage_bytes 无法精确换算，请修正后再保存');
+    }
+  }
+  const remind = Array.isArray(grace.remind_days)
+    ? grace.remind_days.join(',')
+    : '';
   return {
     ...row,
     trial_enabled: Boolean(trial.enabled),
@@ -134,7 +175,12 @@ function explodeJsonFields(row: BillingPlan): Record<string, any> {
     trial_times: trial.times ?? 1,
     grace_remind_days: remind,
     grace_days: grace.grace_days ?? 0,
-    quota_json: Object.keys(quota).length > 0 ? JSON.stringify(quota, null, 2) : '',
+    storage_quota_value: storageQuota.value,
+    storage_quota_unit: storageQuota.unit,
+    quota_json:
+      Object.keys(otherQuota).length > 0
+        ? JSON.stringify(otherQuota, null, 2)
+        : '',
   };
 }
 
@@ -226,10 +272,10 @@ const [addModal, addModalApi] = useVbenModal({
         </VbenButton>
       </template>
     </Grid>
-    <editModal :title="'编辑档位'" :fullscreen-button="false" class="w-[800px]">
+    <editModal title="编辑档位" :fullscreen-button="false" class="w-[800px]">
       <EditForm />
     </editModal>
-    <addModal :title="'添加档位'" :fullscreen-button="false" class="w-[800px]">
+    <addModal title="添加档位" :fullscreen-button="false" class="w-[800px]">
       <AddForm />
     </addModal>
   </Page>

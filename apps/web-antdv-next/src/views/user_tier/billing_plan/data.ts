@@ -5,12 +5,13 @@ import type { BillingPlan } from '#/api/user_tier/billing_plan';
 import { $t } from '@vben/locales';
 
 import { BILLING_STATUS_OPTIONS } from '../billing_offering/data';
+import { formatStorageBytes } from './storageQuota';
 
 /**
  * 商品档位（billing_plan）管理面 —— 价格 + 配额快照 + 试用/宽限策略
  * 改价只影响新购续费（已购周期固化配额快照）。
- * 试用/宽限用结构化字段（enabled/days/times、remind_days/grace_days），不裸编 JSON；
- * quota_json 因随商品种类而异（站点数/内存/席位数/max_agents…）保留 JSON 编辑。
+ * 试用、宽限与 LLM 套餐存储权益使用结构化字段；
+ * 其他随商品变化的配额仍保留高级 JSON 编辑，但不得在其中手写 storage_bytes。
  */
 
 export const PRICE_UNIT_OPTIONS = [
@@ -22,6 +23,11 @@ export const CYCLE_OPTIONS = [
   { label: '一次买断', value: 'once', color: 'default' },
   { label: '月', value: 'month', color: 'blue' },
   { label: '年', value: 'year', color: 'green' },
+];
+
+export const STORAGE_UNIT_OPTIONS = [
+  { label: 'GiB（二进制）', value: 'GiB' },
+  { label: 'TiB（二进制）', value: 'TiB' },
 ];
 
 // 复用商品目录的上/下架状态选项
@@ -100,6 +106,20 @@ export function useColumns(
         const t = row.trial_json || {};
         if (!t.enabled) return '无';
         return `${t.days || 0}天 ×${t.times ?? 1}`;
+      },
+    },
+    {
+      field: 'quota_json',
+      title: '存储空间',
+      width: 130,
+      formatter: ({ row }: { row: BillingPlan }) => {
+        const bytes = row.quota_json?.storage_bytes;
+        if (!Number.isSafeInteger(bytes) || bytes < 0) return '未配置';
+        try {
+          return formatStorageBytes(bytes);
+        } catch {
+          return `${bytes} bytes`;
+        }
       },
     },
     {
@@ -234,15 +254,45 @@ export const formSchema: VbenFormSchema[] = [
     help: '到期后停服保留数据的宽限期',
   },
   {
+    component: 'InputNumber',
+    fieldName: 'storage_quota_value',
+    label: '存储空间',
+    rules: 'required',
+    componentProps: {
+      min: 1,
+      precision: 0,
+      step: 1,
+      style: 'width: 100%',
+    },
+    dependencies: {
+      show: (values) => values.offering_key === 'llm:tier',
+      triggerFields: ['offering_key'],
+    },
+    help: '只接受正整数，按右侧选择的二进制单位精确换算为 bytes',
+  },
+  {
+    component: 'Select',
+    fieldName: 'storage_quota_unit',
+    label: '存储单位',
+    rules: 'required',
+    defaultValue: 'GiB',
+    componentProps: { options: STORAGE_UNIT_OPTIONS },
+    dependencies: {
+      show: (values) => values.offering_key === 'llm:tier',
+      triggerFields: ['offering_key'],
+    },
+    help: '1 GiB = 1024³ bytes；1 TiB = 1024⁴ bytes',
+  },
+  {
     component: 'Textarea',
     fieldName: 'quota_json',
-    label: '配额包快照(JSON)',
+    label: '其他配额(JSON)',
     componentProps: {
       placeholder:
         '随商品种类而异，如 {"sites":1,"memory_mb":512,"seats":5,"max_agents":3}',
       rows: 4,
     },
-    help: '购买时固化进权益行的配额包（站点数/内存/卷/席位数/max_agents…）',
+    help: '高级字段会与结构化配额合并；禁止在此手写 storage_bytes',
   },
   {
     component: 'Select',
