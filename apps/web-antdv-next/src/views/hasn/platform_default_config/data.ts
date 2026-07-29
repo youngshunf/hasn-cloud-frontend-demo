@@ -10,10 +10,22 @@ export const mediaSchema: VbenFormSchema[] = [
   {
     component: 'Select',
     fieldName: 'image_models',
-    label: '图像模型（failover 顺序）',
+    label: '文生图模型（failover 顺序）',
     componentProps: {
       mode: 'tags',
       placeholder: '输入模型名后回车，如 gpt-image-2（须 new-api 已开渠道）',
+      style: 'width: 100%',
+      tokenSeparators: [',', ' '],
+      open: false,
+    },
+  },
+  {
+    component: 'Select',
+    fieldName: 'image_edit_models',
+    label: '图像编辑模型（failover 顺序）',
+    componentProps: {
+      mode: 'tags',
+      placeholder: '输入支持 /images/edits 的模型名后回车，如 gpt-image-2',
       style: 'width: 100%',
       tokenSeparators: [',', ' '],
       open: false,
