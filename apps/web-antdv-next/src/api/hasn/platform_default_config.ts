@@ -53,10 +53,22 @@ export interface PlatformDefaultConfig {
   app_configs?: Record<string, Record<string, any>>;
 }
 
+export type PlatformConfigUpgradeAdvisoryFieldPath =
+  | 'node.media.stt_models'
+  | 'node.media.tts_models';
+
+export interface PlatformConfigUpgradeAdvisory {
+  code: 'legacy_speech_gateway_model';
+  field_path: PlatformConfigUpgradeAdvisoryFieldPath;
+  legacy_models: string[];
+  recommended_models: string[];
+}
+
 // GET 响应（config + 审计元数据）
 export interface PlatformDefaultConfigResponse {
   config: PlatformDefaultConfig;
   revision: string;
+  upgrade_advisories: PlatformConfigUpgradeAdvisory[];
   updated_by?: null | string;
   updated_time?: null | string;
 }
