@@ -90,7 +90,9 @@ export const querySchema: VbenFormSchema[] = [
 ];
 
 /** 把 `inputs` 表渲染成一行可读文案（不支持的键不显示——省略即不支持）。 */
-export function formatInputs(inputs: Record<string, string> | undefined): string {
+export function formatInputs(
+  inputs: Record<string, string> | undefined,
+): string {
   if (!inputs) {
     return '';
   }
@@ -159,7 +161,8 @@ export function useColumns(
       field: 'inputs',
       title: '输入要求',
       minWidth: 200,
-      formatter: ({ row }: { row: HasnModelRegistry }) => formatInputs(row.inputs),
+      formatter: ({ row }: { row: HasnModelRegistry }) =>
+        formatInputs(row.inputs),
     },
     {
       field: 'dialect',

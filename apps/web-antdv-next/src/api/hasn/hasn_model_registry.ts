@@ -110,9 +110,11 @@ export async function patchModelAnnotationApi(
   id: number,
   data: PatchModelAnnotationParams,
 ): Promise<HasnModelRegistry> {
-  return requestClient.patch<HasnModelRegistry>(
+  // `RequestClient` 只封了 get/post/put/delete，没有 patch 快捷方法——走通用 request 指定动词，
+  // 不要为了图省事把后端改成 PUT（这个端点语义就是「只改人工标注那几列」）。
+  return requestClient.request<HasnModelRegistry>(
     `/api/v1/hasn/model-registry/${id}`,
-    data,
+    { data, method: 'PATCH' },
   );
 }
 

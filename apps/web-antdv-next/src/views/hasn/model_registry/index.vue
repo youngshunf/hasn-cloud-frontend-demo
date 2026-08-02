@@ -33,10 +33,10 @@ defineOptions({
 });
 
 /** 上一轮同步的真实结果（没同步过就不显示，绝不摆一份看起来同步过的假数字）。 */
-const lastReport = ref<null | ModelRegistrySyncReport>(null);
+const lastReport = ref<ModelRegistrySyncReport | null>(null);
 const syncing = ref(false);
 /** 正在标注的那一行。 */
-const editing = ref<null | HasnModelRegistry>(null);
+const editing = ref<HasnModelRegistry | null>(null);
 
 const formOptions: VbenFormProps = {
   collapsed: false,
@@ -124,8 +124,7 @@ function splitInputs(inputs: Record<string, string> | undefined) {
     input_audio: table.audio ?? 'unsupported',
     input_image: table.image ?? 'unsupported',
     input_last_frame: table.last_frame ?? 'unsupported',
-    inputs_extra:
-      Object.keys(extra).length > 0 ? JSON.stringify(extra) : '',
+    inputs_extra: Object.keys(extra).length > 0 ? JSON.stringify(extra) : '',
   };
 }
 
