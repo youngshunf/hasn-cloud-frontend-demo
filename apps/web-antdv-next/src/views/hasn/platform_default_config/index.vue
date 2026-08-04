@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { PlatformDefaultConfig } from '#/api/hasn/platform_default_config';
+import type {
+  PlatformConfigUpgradeAdvisory,
+  PlatformDefaultConfig,
+} from '#/api/hasn/platform_default_config';
 
 import { onMounted, ref } from 'vue';
 
@@ -13,6 +16,7 @@ import {
   updatePlatformDefaultConfigApi,
 } from '#/api/hasn/platform_default_config';
 
+import { platformUpgradeAdvisoryFieldLabel } from './advisory';
 import {
   fallbackPoolSchema,
   mediaSchema,
@@ -29,6 +33,7 @@ const saving = ref(false);
 const revision = ref('');
 const updatedBy = ref<null | string>(null);
 const updatedTime = ref<null | string>(null);
+const upgradeAdvisories = ref<PlatformConfigUpgradeAdvisory[]>([]);
 
 const [MediaForm, mediaFormApi] = useVbenForm({
   showDefaultActions: false,
@@ -112,6 +117,7 @@ async function load() {
     revision.value = res.revision;
     updatedBy.value = res.updated_by ?? null;
     updatedTime.value = res.updated_time ?? null;
+    upgradeAdvisories.value = res.upgrade_advisories ?? [];
     await applyConfig(res.config);
   } finally {
     loading.value = false;
@@ -174,6 +180,7 @@ async function onSave() {
     revision.value = res.revision;
     updatedBy.value = res.updated_by ?? null;
     updatedTime.value = res.updated_time ?? null;
+    upgradeAdvisories.value = res.upgrade_advisories ?? [];
     await applyConfig(res.config);
     message.success('已保存，新配置将通过同步自动下发到桌面端与 Agent 运行时');
   } finally {
@@ -197,6 +204,34 @@ onMounted(load);
         message="生效说明"
         description="保存后服务端重算 revision，桌面端在下一次登录/同步（或后台 reconcile）时拉取并应用：媒体模型立即对下次调用生效；Agent 运行时模型经现有 provision 链路重写 config.yaml。媒体模型名必须是 new-api 已开渠道的模型，否则 failover 会全部失败。"
       />
+
+      <Alert
+        v-if="upgradeAdvisories.length > 0"
+        class="mb-4"
+        type="warning"
+        show-icon
+        message="存在可升级的默认链"
+      >
+        <template #description>
+          <p class="text-base">
+            当前配置是部分自定义链，系统已保留原值。请确认渠道可用后，手动移除以下旧模型。
+          </p>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-base">
+            <li
+              v-for="advisory in upgradeAdvisories"
+              :key="advisory.field_path"
+            >
+              <span class="font-medium">
+                {{ platformUpgradeAdvisoryFieldLabel(advisory.field_path) }}
+              </span>
+              ：旧模型
+              <code>{{ advisory.legacy_models.join('、') }}</code>
+              ；当前推荐
+              <code>{{ advisory.recommended_models.join('、') }}</code>
+            </li>
+          </ul>
+        </template>
+      </Alert>
 
       <!-- 卡片网格：宽屏一行两个、窄屏单列自适应；grid gap 同时提供横向/纵向间距（比 mb-4
            可靠，不被 Card 样式覆盖）；items-start 让各卡片按自身高度顶部对齐，不强行拉等高 -->
