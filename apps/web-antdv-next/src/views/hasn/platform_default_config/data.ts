@@ -57,18 +57,10 @@ export const mediaSchema: VbenFormSchema[] = [
       open: false,
     },
   },
-  {
-    component: 'Select',
-    fieldName: 'video_models',
-    label: '视频生成模型（failover 顺序）',
-    componentProps: {
-      mode: 'tags',
-      placeholder: '输入模型名后回车，如 wan2.5-i2v（须 new-api 已开渠道）',
-      style: 'width: 100%',
-      tokenSeparators: [',', ' '],
-      open: false,
-    },
-  },
+  // 注意：video_models 不在此 schema 内。视频模型每项除模型名外还携带
+  // modality（文生/图生）与 dialect（OpenAI/阿里方言）元数据（后端 VideoModelSpec），
+  // tags Select 只能承载字符串数组——曾把对象数组渲染成空白 chip、保存时还会把
+  // 对象整条过滤丢数据。video_models 由 index.vue 里的行编辑器单独承载。
 ];
 
 // 主模型 failover 全局兜底池（与四槽 models 同级，挂 agent_runtime.model_fallback_pool）。

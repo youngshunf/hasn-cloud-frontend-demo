@@ -2,13 +2,14 @@
 import type {
   PlatformConfigUpgradeAdvisory,
   PlatformDefaultConfig,
+  VideoModelSpec,
 } from '#/api/hasn/platform_default_config';
 
 import { onMounted, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import { Alert, Button, Card, message, Spin } from 'antdv-next';
+import { Alert, Button, Card, Input, message, Select, Spin } from 'antdv-next';
 
 import { useVbenForm } from '#/adapter/form';
 import {
@@ -34,6 +35,94 @@ const revision = ref('');
 const updatedBy = ref<null | string>(null);
 const updatedTime = ref<null | string>(null);
 const upgradeAdvisories = ref<PlatformConfigUpgradeAdvisory[]>([]);
+
+// 视频模型行编辑器状态（每项除模型名外还携带 modality/dialect 元数据，tags Select
+// 承载不了，故不走 MediaForm，由本页自渲染）。quality/notes 是运营标注，编辑行不暴露，
+// 但必须原样保留，不能因保存被剥掉。
+interface VideoModelRow {
+  name: string;
+  modality: NonNullable<VideoModelSpec['modality']>;
+  dialect: NonNullable<VideoModelSpec['dialect']>;
+  quality?: VideoModelSpec['quality'];
+  notes?: null | string;
+}
+const videoModels = ref<VideoModelRow[]>([]);
+
+const videoModalityOptions = [
+  { value: 'any', label: '文生 + 图生均可' },
+  { value: 'text_to_video', label: '仅文生视频' },
+  { value: 'image_to_video', label: '仅图生视频' },
+];
+const videoDialectOptions = [
+  { value: 'openai', label: 'OpenAI 兼容（宽x高）' },
+  { value: 'ali', label: '阿里万相系（480P/720P/1080P）' },
+];
+
+function toVideoModelRow(item: string | VideoModelSpec): VideoModelRow {
+  if (typeof item === 'string') {
+    // 字符串写法按后端语义等价于 any + openai
+    return { name: item, modality: 'any', dialect: 'openai' };
+  }
+  return {
+    name: item.name ?? '',
+    modality: item.modality ?? 'any',
+    dialect: item.dialect ?? 'openai',
+    quality: item.quality ?? null,
+    notes: item.notes ?? null,
+  };
+}
+
+function moveVideoModel(index: number, offset: number) {
+  const target = index + offset;
+  if (target < 0 || target >= videoModels.value.length) {
+    return;
+  }
+  const rows = [...videoModels.value];
+  const [row] = rows.splice(index, 1);
+  if (!row) {
+    return;
+  }
+  rows.splice(target, 0, row);
+  videoModels.value = rows;
+}
+
+// 组装写回后端的 video_models：全部默认（any/openai 且无运营标注）的项回落为字符串
+// 写法，保持存量数据形状最小 diff；其余写完整对象。
+function buildVideoModelsPayload(): (string | VideoModelSpec)[] | null {
+  const names = new Set<string>();
+  const result: (string | VideoModelSpec)[] = [];
+  for (const row of videoModels.value) {
+    const name = row.name.trim();
+    if (name.length === 0) {
+      message.error('视频生成模型存在未填模型名的行，请补全或删除后再保存');
+      return null;
+    }
+    if (names.has(name)) {
+      message.error(
+        `视频生成模型「${name}」重复，failover 列表中每个模型只能出现一次`,
+      );
+      return null;
+    }
+    names.add(name);
+    if (
+      row.modality === 'any' &&
+      row.dialect === 'openai' &&
+      !row.quality &&
+      !row.notes
+    ) {
+      result.push(name);
+    } else {
+      result.push({
+        name,
+        modality: row.modality,
+        dialect: row.dialect,
+        ...(row.quality ? { quality: row.quality } : {}),
+        ...(row.notes ? { notes: row.notes } : {}),
+      });
+    }
+  }
+  return result;
+}
 
 const [MediaForm, mediaFormApi] = useVbenForm({
   showDefaultActions: false,
@@ -92,8 +181,10 @@ async function applyConfig(config: PlatformDefaultConfig) {
     image_edit_models: media?.image_edit_models ?? [],
     tts_models: media?.tts_models ?? [],
     stt_models: media?.stt_models ?? [],
-    video_models: media?.video_models ?? [],
   });
+  videoModels.value = (media?.video_models ?? []).map((item) =>
+    toVideoModelRow(item),
+  );
   await runtimeFormApi.setValues({
     main: models?.main ?? '',
     fast: models?.fast ?? '',
@@ -146,6 +237,11 @@ async function onSave() {
   const fallbackValues = await fallbackFormApi.getValues();
   const securityValues = await securityFormApi.getValues();
 
+  const videoModelsPayload = buildVideoModelsPayload();
+  if (videoModelsPayload === null) {
+    return;
+  }
+
   const payload: PlatformDefaultConfig = {
     node: {
       media: {
@@ -153,7 +249,7 @@ async function onSave() {
         image_edit_models: normalizeModelList(mediaValues.image_edit_models),
         tts_models: normalizeModelList(mediaValues.tts_models),
         stt_models: normalizeModelList(mediaValues.stt_models),
-        video_models: normalizeModelList(mediaValues.video_models),
+        video_models: videoModelsPayload,
       },
     },
     agent_runtime: {
@@ -245,6 +341,75 @@ onMounted(load);
             </span>
           </template>
           <MediaForm />
+
+          <!-- 视频模型行编辑器：每项需同时维护模型名 + 模态 + 方言（见 data.ts 注释） -->
+          <div class="mt-2">
+            <div class="mb-2 text-sm font-medium">
+              视频生成模型（failover 顺序）
+            </div>
+            <div
+              v-if="videoModels.length === 0"
+              class="mb-2 text-sm text-gray-400"
+            >
+              未配置——daemon 回落内置网关模型链
+            </div>
+            <div
+              v-for="(row, index) in videoModels"
+              :key="index"
+              class="mb-2 flex items-center gap-2"
+            >
+              <Input
+                v-model:value="row.name"
+                class="flex-1"
+                placeholder="模型名，如 agnes-video-v2.0（须 new-api 已开渠道）"
+              />
+              <Select
+                v-model:value="row.modality"
+                :options="videoModalityOptions"
+                style="width: 150px"
+              />
+              <Select
+                v-model:value="row.dialect"
+                :options="videoDialectOptions"
+                style="width: 210px"
+              />
+              <Button
+                size="small"
+                :disabled="index === 0"
+                @click="moveVideoModel(index, -1)"
+              >
+                上移
+              </Button>
+              <Button
+                size="small"
+                :disabled="index === videoModels.length - 1"
+                @click="moveVideoModel(index, 1)"
+              >
+                下移
+              </Button>
+              <Button size="small" danger @click="videoModels.splice(index, 1)">
+                删除
+              </Button>
+            </div>
+            <Button
+              size="small"
+              @click="
+                videoModels.push({
+                  name: '',
+                  modality: 'any',
+                  dialect: 'openai',
+                })
+              "
+            >
+              添加视频模型
+            </Button>
+            <p class="mt-1 text-sm text-gray-400">
+              首个优先，按顺序
+              failover。模态声明承接的输入形态（文生请求发给图生模型必然失败且仍预扣配额）；
+              方言决定入参形状（阿里万相系图生只认档位，OpenAI 兼容要 宽x高）。
+            </p>
+          </div>
+
           <p class="mt-1 text-sm text-gray-400">
             本地模型、安装状态与 benchmark 由节点语音 catalog
             管理；主人在本机选择

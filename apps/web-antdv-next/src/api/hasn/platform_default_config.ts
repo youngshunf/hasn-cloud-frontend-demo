@@ -7,6 +7,17 @@ import { requestClient } from '#/api/request';
  * 单行权威表 hasn_platform_default_config，Admin 覆盖式 PUT，server 重算 revision。
  */
 
+// 视频模型声明（与后端 VideoModelSpec 对齐）。视频渠道入参差异远大于图像/语音：
+// modality 声明承接的输入形态（t2v 请求发给 i2v 模型必然失败且仍预扣配额），
+// dialect 声明入参方言（阿里万相系 i2v 只认 480P/720P/1080P 档位，OpenAI 兼容要 宽x高）。
+export interface VideoModelSpec {
+  name: string;
+  modality?: 'any' | 'image_to_video' | 'text_to_video';
+  dialect?: 'ali' | 'openai';
+  quality?: 'draft' | 'high' | 'standard' | null;
+  notes?: null | string;
+}
+
 // New API 网关媒体模型链（文生图/图像编辑/tts/stt/video）；不承载本地模型与本地路由策略。
 // 列表为空时 daemon 回落到内置网关模型链，不代表强制本地推理。
 export interface PlatformMediaDefaults {
@@ -14,7 +25,9 @@ export interface PlatformMediaDefaults {
   image_edit_models: string[];
   tts_models: string[];
   stt_models: string[];
-  video_models: string[];
+  // 每项可为模型名字符串（等价 modality=any + dialect=openai）或 VideoModelSpec 对象；
+  // 字符串写法只适合 OpenAI 兼容且 t2v/i2v 通吃的模型，其余建议对象写法。
+  video_models: (string | VideoModelSpec)[];
 }
 
 export interface PlatformNodeDefaults {
