@@ -60,11 +60,15 @@ const STATUS_OPTIONS = [
   { label: '已下架', value: 'disabled' },
   { label: '草稿', value: 'draft' },
 ];
-/** 发布阶段（内测）：与上架状态 status 正交。灰度内测仅被邀请/审批通过的用户可见可开。 */
+/**
+ * 发布阶段：与上架状态 status 正交。灰度内测仅被邀请/审批通过的用户可见可开；
+ * 演示（demo）照常可见可点开，但页面渲染静态原型稿、且该应用全部工具对分身隐身。
+ */
 const RELEASE_PHASE_OPTIONS = [
   { label: '正式发布 (GA)', value: 'ga' },
   { label: '全量内测', value: 'beta_full' },
   { label: '灰度内测', value: 'beta_gray' },
+  { label: '演示（原型稿·分身无工具）', value: 'demo' },
 ];
 
 /**
@@ -421,7 +425,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '发布阶段',
     defaultValue: 'ga',
     componentProps: { options: RELEASE_PHASE_OPTIONS },
-    help: '与上架状态正交。全量内测=所有人可见并标内测；灰度内测=仅被邀请/审批通过的用户可见可开',
+    help: '与上架状态正交。全量内测=所有人可见并标内测；灰度内测=仅被邀请/审批通过的用户可见可开；演示=可见可点开但页面是静态原型稿，分身搜不到也调不动该应用的工具',
   },
   {
     component: 'Input',
