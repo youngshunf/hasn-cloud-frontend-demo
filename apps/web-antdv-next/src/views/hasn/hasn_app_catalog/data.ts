@@ -41,6 +41,25 @@ const BILLING_CYCLE_OPTIONS = [
   { label: '包月', value: 'month' },
   { label: '包年', value: 'year' },
 ];
+/**
+ * 上架状态：**本地三值常量，不要换回 `getDictOptions('hasn_status')`。**
+ *
+ * `hasn_status` 是一条「HASN 模块通用状态字典」，`fba codegen` 把每张 `hasn_*` 表的 `status`
+ * 列都往同一个 type_code 里塞值，现已积到约 50 个取值——文章的 `启用/禁用`、联系人的
+ * `待处理/已连接`、绑定的 `已绑/未绑`、消息的 `已发送/已送达`、用户的 `正常/已暂停`…
+ * 全混在一个下拉里，管理员根本挑不出应用目录自己的那三个。
+ *
+ * 更糟的是同一 value 被多个模块以不同标签抢注（`disabled` 既有「已下架」又有「已禁用」，
+ * `active` 三份、`expired` 五份），各生成文件的幂等守卫是 `IF NOT EXISTS (type_code, value)`，
+ * 于是最终标签取决于迁移执行顺序。而后端 schema 的 `status` 是裸 `str` 无枚举约束，误选
+ * 「已接收」会把 `accepted` 写进 `hasn_app_catalog.status`，`!= 'published'` 即让应用从全端
+ * 静默消失。故本页与同文件其余七组枚举一致，改用本地常量（取值与后端 schema 注释一致）。
+ */
+const STATUS_OPTIONS = [
+  { label: '已上架', value: 'published' },
+  { label: '已下架', value: 'disabled' },
+  { label: '草稿', value: 'draft' },
+];
 /** 发布阶段（内测）：与上架状态 status 正交。灰度内测仅被邀请/审批通过的用户可见可开。 */
 const RELEASE_PHASE_OPTIONS = [
   { label: '正式发布 (GA)', value: 'ga' },
@@ -110,7 +129,7 @@ export const querySchema: VbenFormSchema[] = [
     label: '上架状态',
     componentProps: {
       allowClear: true,
-      options: getDictOptions('hasn_status'),
+      options: STATUS_OPTIONS,
     },
   },
   {
@@ -174,7 +193,7 @@ export function useColumns(
       width: 150,
       cellRender: {
         name: 'CellTag',
-        options: getDictOptions('hasn_status'),
+        options: STATUS_OPTIONS,
       },
     },
     {
@@ -352,7 +371,7 @@ export const formSchema: VbenFormSchema[] = [
     label: '上架状态',
     rules: 'required',
     defaultValue: 'published',
-    componentProps: { options: getDictOptions('hasn_status') },
+    componentProps: { options: STATUS_OPTIONS },
   },
   {
     component: 'Select',
